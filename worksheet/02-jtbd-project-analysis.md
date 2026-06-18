@@ -9,7 +9,9 @@ companion-reference: Strategyn_JTBD_Playbook.pdf (giảng viên gửi kèm)
 
 # Lab 2 — JTBD Project Analysis / Dùng JTBD để soi lại dự án nhóm
 
-**Tên dự án / sản phẩm:** _______________  
+**Tên dự án / sản phẩm:** **TraVy** — trợ lý cá nhân hóa kế hoạch hành trình du lịch, khám phá Việt Nam.  
+**Người làm:** **Nguyễn Văn Dưỡng**  
+**Ngày:** **18/06/2026**  
 
 > Đây là **file duy nhất** của Lab 2.  
 > File này đồng thời đóng vai trò:
@@ -92,17 +94,17 @@ Phần lớn dự án nhóm viết quá rộng ở bước này, rồi sau đó 
 
 ### Khoanh đúng 1 lát cắt theo 4 điểm
 
-- [ ] **1 nhóm người dùng chính**
-- [ ] **1 hoàn cảnh / tình huống rõ**
-- [ ] **1 job cốt lõi**
-- [ ] **1 workflow đủ cụ thể để vẽ ra được**
+- [x] **1 nhóm người dùng chính**
+- [x] **1 hoàn cảnh / tình huống rõ**
+- [x] **1 job cốt lõi**
+- [x] **1 workflow đủ cụ thể để vẽ ra được**
 
 ### Điền nhanh trước khi làm
 
-- **Dự án của nhóm tôi là:** ___________________________________
-- **Lát cắt tôi chọn để phân tích hôm nay là:** ___________________________________
+- **Dự án của nhóm tôi là:** **TraVy** — trợ lý du lịch AI chuyên biệt cho Việt Nam, giúp du khách tạo lịch trình cá nhân hóa qua hội thoại tự nhiên, dựa trên dữ liệu RAG tuyển chọn (171 địa điểm, 5 tỉnh/thành).
+- **Lát cắt tôi chọn để phân tích hôm nay là:** Giúp du khách nội địa tự túc lên lịch trình chuyến đi ngắn ngày (2–5 ngày) đến một tỉnh/thành chưa quen, từ bước research đến khi có lịch trình theo ngày sẵn sàng đi.
 - **Vì sao tôi chọn lát cắt này:**  
-  > ___________________________________
+  > Đây là **use case cốt lõi nhất** của MVP: workflow rõ ràng (research → sắp xếp → chốt lịch trình), pain point lớn nhất (mất 4–10 giờ research theo PRD), và là lát cắt mà dữ liệu RAG hiện tại đã đủ phục vụ (5 tỉnh/thành, 171 địa điểm active). Du khách nội địa chiếm phần lớn thị trường du lịch Việt Nam (~85 triệu lượt/năm) và ít bị chặn bởi rào cản ngôn ngữ.
 
 ### Viết quá rộng vs viết sắc hơn
 
@@ -121,13 +123,13 @@ Phần lớn dự án nhóm viết quá rộng ở bước này, rồi sau đó 
 ### Tóm tắt dự án trong 3 dòng
 
 1. **Nhóm tôi đang nghĩ mình đang giải quyết vấn đề gì?**  
-   > ___________________________________
+   > Việc lập kế hoạch du lịch Việt Nam bị **phân mảnh** giữa nhiều nguồn (Google, blog, Facebook, bản đồ, nền tảng đặt dịch vụ), khiến du khách mất **4–10 giờ research** mỗi chuyến và nhận lịch trình chung chung, thiếu tri thức địa phương.
 
 2. **Người dùng chính hiện nhóm đang nhắm tới là ai?**  
-   > ___________________________________
+   > **Du khách nội địa tự túc** (20–35 tuổi, có thu nhập, tự tổ chức chuyến đi ngắn ngày) — người trực tiếp research và quyết định lịch trình, không dùng tour agency.
 
 3. **Hiện tại người dùng đó đang giải quyết vấn đề này bằng cách nào?**  
-   > ___________________________________
+   > Tự gom thông tin từ **Google search + blog du lịch + group Facebook + hỏi bạn bè** → copy-paste vào Google Sheets/Notes → tự sắp xếp thành lịch trình. Gần đây một số người dùng **ChatGPT/Gemini** nhưng gặp vấn đề bịa địa điểm và thiếu dữ liệu Việt Nam chuyên sâu.
 
 ---
 
@@ -139,21 +141,20 @@ Phần lớn dự án nhóm viết quá rộng ở bước này, rồi sau đó 
 ### Trả lời 4 câu ngắn
 
 1. **Ai đang gặp vấn đề này?**  
-   > ___________________________________
+   > Du khách nội địa tự túc muốn đi du lịch ngắn ngày (2–5 ngày) đến tỉnh/thành chưa quen — đặc biệt nhóm 20–35 tuổi, đi cùng bạn hoặc gia đình nhỏ.
 
 2. **Vấn đề xuất hiện trong hoàn cảnh nào?**  
-   > ___________________________________
+   > Trước chuyến đi 1–2 tuần, khi cần lên lịch trình nhưng thông tin phân mảnh trên hàng chục nguồn (blog, Facebook, Google Maps). Đặc biệt đau khi đi đến nơi chưa quen và không có bạn bè địa phương để hỏi.
 
 3. **Hiện tại họ đang dùng giải pháp thay thế nào?**  
-   > ___________________________________
+   > Google search + blog du lịch (Traveloka Magazine, VnExpress Du lịch), group Facebook ("Review du lịch"), ChatGPT/Gemini generic, hỏi bạn bè đã đi — hoặc **đặt tour trọn gói** để khỏi phải tự research.
 
 4. **Vì sao đây là thời điểm đáng giải?**  
-   > ___________________________________
+   > AI generative đã đủ mạnh để tạo lịch trình cá nhân hóa, nhưng các tool generic (ChatGPT, Gemini) **thiếu dữ liệu Việt Nam chuyên sâu** và **hay bịa địa điểm**. Đồng thời du lịch nội địa Việt Nam đang bùng nổ (~85 triệu lượt/năm) — nhu cầu lớn nhưng chưa có giải pháp chuyên biệt nào chiếm entry point.
 
 ### Tóm tắt market context trong 3-4 dòng
 
-> _______________________________________________  
-> _______________________________________________
+> Du khách nội địa tự túc đang mất 4–10 giờ gom thông tin rời rạc từ blog, Facebook, Google Maps để lên lịch trình cho chuyến đi ngắn ngày. Các tool AI generic (ChatGPT/Gemini) giúp nhanh hơn nhưng hay bịa địa điểm và thiếu tri thức địa phương Việt Nam. Trong khi đó du lịch nội địa đang bùng nổ (~85 triệu lượt/năm) nhưng chưa có giải pháp chuyên biệt nào giúp cá nhân hóa lịch trình dựa trên dữ liệu tuyển chọn và đáng tin.
 
 ---
 
@@ -174,9 +175,9 @@ Phần lớn dự án nhóm viết quá rộng ở bước này, rồi sau đó 
 
 ### Điền
 
-- **Job executor của dự án này là:** ___________________________________
+- **Job executor của dự án này là:** **Du khách nội địa tự túc** — người trực tiếp ngồi research, chọn địa điểm, và sắp xếp lịch trình cho chuyến đi của mình.
 - **Vì sao tôi tin đây là người trực tiếp "thuê" giải pháp để làm job:**  
-  > ___________________________________
+  > Đây là người **trực tiếp mở Google/blog/Facebook để tìm thông tin** và **tự tay ghép lịch trình**. Không phải travel agent (bên thứ ba), không phải người đi cùng chỉ "follow" lịch trình, không phải công ty tour (buyer nhưng không làm job). Họ là người chịu toàn bộ friction của quá trình research → sắp xếp → chốt lịch trình.
 
 ---
 
@@ -200,23 +201,23 @@ Phần lớn dự án nhóm viết quá rộng ở bước này, rồi sau đó 
 
 ### 3 tiêu chí tự kiểm
 
-- [ ] Nếu bỏ tool hiện tại đi, job này vẫn còn tồn tại
-- [ ] Trong câu không có tên sản phẩm, AI, chatbot, app, màn hình
-- [ ] Câu đang mô tả **điều user muốn hoàn thành**, không phải thứ product đang làm
+- [x] Nếu bỏ tool hiện tại đi, job này vẫn còn tồn tại
+- [x] Trong câu không có tên sản phẩm, AI, chatbot, app, màn hình
+- [x] Câu đang mô tả **điều user muốn hoàn thành**, không phải thứ product đang làm
 
 ### Bản nháp 1
 
 **Core JTBD bản nháp:**  
-> _______________________________________________
+> Lên lịch trình du lịch cá nhân hóa bằng hội thoại AI cho chuyến đi ngắn ngày đến nơi chưa quen ở Việt Nam
 
 ### Gạch bỏ từ solution nếu có
 
-- Các từ solution tôi đang lỡ nhét vào câu: _________________________________
+- Các từ solution tôi đang lỡ nhét vào câu: **"bằng hội thoại AI"** — đây là solution/delivery method, không phải job
 
 ### Bản chốt
 
 **Core JTBD cuối cùng:**  
-> _______________________________________________
+> **Lên lịch trình du lịch phù hợp sở thích cá nhân và ràng buộc thời gian cho chuyến đi ngắn ngày đến nơi chưa quen**
 
 ---
 
@@ -239,15 +240,15 @@ When [trigger], I want to [motivation], so I can [outcome].
 
 | # | Trigger / When | Motivation / I want to | Outcome / so I can | Điều story này cho thấy |
 |---|---|---|---|---|
-| JS1 | | | | |
-| JS2 | | | | |
-| JS3 | | | | |
+| JS1 | Quyết định đi Hội An 3 ngày cuối tuần tới nhưng chưa biết gì về Hội An ngoài phố cổ | Có lịch trình theo ngày với địa điểm + ẩm thực + hoạt động phù hợp sở thích (ẩm thực, lịch sử) | Không mất cả tuần research mà vẫn có trải nghiệm chất lượng, không chỉ đến mấy chỗ quá đông khách | **Pain chính: research tốn thời gian** — user cần output nhanh, cá nhân hóa, từ nguồn đáng tin |
+| JS2 | Lịch trình đã lên nhưng ngày 2 quá dày (5 điểm + di chuyển xa) hoặc trời mưa bất ngờ | Điều chỉnh nhanh mà không phải lên lại từ đầu — gộp/bỏ/đổi điểm, giữ logic di chuyển hợp lý | Giữ nhịp độ thoải mái mà không bỏ lỡ điểm quan trọng, không bị stress giữa chuyến | **Pain phụ: kế hoạch cứng khó sửa** — user cần khả năng tinh chỉnh linh hoạt |
+| JS3 | Đi cùng gia đình (bố mẹ 60+ tuổi, con nhỏ) đến Đà Lạt lần đầu, muốn ăn địa phương nhưng lo chỗ không phù hợp người lớn tuổi | Biết chỗ nào phù hợp cả nhóm + có gợi ý ít tourist trap + nhịp độ vừa phải cho người lớn tuổi | Có trải nghiệm authentic mà vẫn an toàn, thoải mái cho cả nhà — không bị bố mẹ phàn nàn "đi đâu cũng đông" | **Constraint đặc biệt: thành phần nhóm** — cùng 1 job nhưng ràng buộc khác nhau hoàn toàn |
 
 ### Tự kiểm nhanh
 
-- [ ] Mỗi story là một **tình huống thật**, không phải slogan chung chung
-- [ ] 3 story không trùng hệt nhau
-- [ ] Sau khi đọc 3 story, tôi hình dung được lúc nào product của mình đáng xuất hiện
+- [x] Mỗi story là một **tình huống thật**, không phải slogan chung chung
+- [x] 3 story không trùng hệt nhau
+- [x] Sau khi đọc 3 story, tôi hình dung được lúc nào product của mình đáng xuất hiện
 
 ---
 
@@ -268,14 +269,14 @@ Qua JTBD lens, đối thủ không chỉ là app cùng ngành.
 
 | Alternative hiện tại | User đang thuê nó để làm gì? | Nó làm tốt gì? | Nó fail ở đâu? | Switching cost hiện tại cao hay thấp? |
 |---|---|---|---|---|
-| Alt 1 | | | | |
-| Alt 2 | | | | |
-| Alt 3 | | | | |
+| **Google search + blog du lịch** (VnExpress, Traveloka Magazine) | Tìm "lịch trình Hội An 3 ngày", đọc blog → tự ghép | Miễn phí, nguồn phong phú, có ảnh/review thật | **Phân mảnh** (mỗi blog 1 góc nhìn), tốn 4–10h gom + sắp xếp, thông tin hay cũ (giờ mở cửa, giá), không cá nhân hóa | **Thấp** — không tốn tiền, không lock-in |
+| **Group Facebook du lịch** ("Review Hội An", "Du lịch Việt Nam") | Hỏi "đi Hội An 3 ngày nên đi đâu?" → nhận gợi ý từ người đã đi | Kinh nghiệm thật, cập nhật, có thể hỏi lại chi tiết | **Không có cấu trúc** (mỗi người gợi ý khác nhau), phải tự ghép, chất lượng trả lời không đều, chờ reply | **Thấp** — miễn phí, quen thuộc |
+| **ChatGPT / Gemini generic** | Hỏi "lên lịch trình Hội An 3 ngày cho 2 người thích ẩm thực" → nhận lịch trình tức thì | **Nhanh** (có output ngay), hiểu ngữ cảnh, cá nhân hóa cơ bản | **Bịa địa điểm** (hallucination), thiếu dữ liệu Việt Nam chuyên sâu (giờ mở cửa, giá, mẹo địa phương), không có source citation → user phải double-check toàn bộ | **Thấp** — miễn phí, ai cũng đã có sẵn |
 
 ### Kết luận nhanh
 
 **Nếu project của tôi biến mất hôm nay, user nhiều khả năng sẽ quay về:**  
-> _______________________________________________
+> **ChatGPT/Gemini generic** — vì nhanh nhất và đã quen, dù phải tự double-check. Nhóm ít tech-savvy hơn sẽ quay về **Google + blog + Facebook**.
 
 ---
 
@@ -310,23 +311,23 @@ Mục tiêu là nhìn ra:
 
 | Step | Trong workflow này user đang cố làm gì? | Hôm nay họ đang dùng gì? | Friction / pain hiện tại | Mức đau |
 |---|---|---|---|---|
-| Define | | | | Low / Med / High |
-| Locate | | | | Low / Med / High |
-| Prepare | | | | Low / Med / High |
-| Confirm | | | | Low / Med / High |
-| Execute | | | | Low / Med / High |
-| Monitor | | | | Low / Med / High |
-| Modify | | | | Low / Med / High |
-| Conclude | | | | Low / Med / High |
+| Define | Xác định đi đâu, bao nhiêu ngày, đi với ai, ngân sách, loại trải nghiệm mong muốn | Bàn bạc với bạn/gia đình, tự quyết | Ít friction — đây là quyết định cá nhân, không cần tool | **Low** |
+| Locate | Tìm địa điểm, quán ăn, hoạt động phù hợp tại điểm đến chưa quen | Google search + blog + Facebook group + hỏi bạn bè | **Phân mảnh nghiêm trọng**: mỗi nguồn 1 góc nhìn, mất 4–10h gom, thông tin hay cũ, thiên vị điểm đông khách, thiếu tri thức địa phương | **High** |
+| Prepare | Sắp xếp các địa điểm đã tìm thành lịch trình theo ngày hợp lý (khoảng cách, nhịp độ, thời gian mở cửa) | Google Sheets / Notes / tự viết tay + Google Maps đo khoảng cách | **Tốn thời gian, thiếu kiến thức địa lý**: user không biết 2 điểm gần hay xa, giờ mở cửa có khớp không, nhịp độ 1 ngày có quá dày không | **High** |
+| Confirm | Kiểm tra giờ mở cửa, giá vé, khoảng cách thực tế, tình trạng hoạt động | Google Maps + gọi điện + đọc review gần nhất trên Google/TripAdvisor | Tốn thời gian nhưng có tool rõ ràng (Google Maps) — friction vừa phải | **Med** |
+| Execute | Đi theo lịch trình đã lên | Google Maps dẫn đường + lịch trình trên điện thoại | Ít friction nếu lịch trình tốt — chỉ cần follow | **Low** |
+| Monitor | Theo dõi tiến độ trong ngày: có kịp lịch không, có bỏ lỡ gì không | Tự nhìn đồng hồ + đối chiếu lịch trình | Ít friction — kiểm soát được | **Low** |
+| Modify | Điều chỉnh khi có thay đổi bất ngờ (mưa, mệt, phát hiện chỗ hay, chỗ đóng cửa) | Tự nghĩ lại + hỏi locals + search lại trên Google | **Khó sửa khi đang đi**: không biết thay bằng gì, lịch trình cứng trên giấy/note, phải research lại từ đầu cho phần còn lại | **Med** |
+| Conclude | Đánh giá chuyến đi, lưu kinh nghiệm cho lần sau | Ghi nhớ + đăng review Facebook/Google | Ít friction — không liên quan đến planning | **Low** |
 
 ### Chốt 2 bước đau nhất
 
-**Bước đau nhất #1:** _________________________________  
-**Bước đau nhất #2:** _________________________________
+**Bước đau nhất #1:** **Locate** — Tìm địa điểm/ẩm thực/hoạt động phù hợp tại nơi chưa quen  
+**Bước đau nhất #2:** **Prepare** — Sắp xếp thành lịch trình theo ngày hợp lý
 
 **Vì sao đây là nơi đáng chú ý nhất:**  
-> _______________________________________________  
-> _______________________________________________
+> Hai bước này **chiếm 80–90% thời gian** của toàn bộ quá trình lên kế hoạch (4–10 giờ theo PRD). Chúng đau vì: (1) thông tin phân mảnh trên hàng chục nguồn khiến **Locate** biến thành "mò kim đáy bể", (2) user thiếu kiến thức địa lý nên **Prepare** trở thành bài toán tối ưu mà không có dữ liệu — sắp 5 điểm vào 1 ngày nhưng không biết có kịp di chuyển không.  
+> Đây cũng là 2 bước mà **current alternatives fail nặng nhất**: blog/Facebook không có cấu trúc (Locate), ChatGPT generic bịa địa điểm (Locate), và không tool nào giúp tự động sắp lịch trình tối ưu khoảng cách (Prepare).
 
 ---
 
@@ -345,16 +346,16 @@ Sau khi map workflow, mới hỏi:
 
 | Step | AI nên giúp bằng cách nào? | Vì sao AI hợp ở đây? | Rủi ro chính nếu dùng AI |
 |---|---|---|---|
-| 1 | | | |
-| 2 | | | |
+| **Locate** | Tổng hợp từ dữ liệu RAG tuyển chọn (171 địa điểm, 5 tỉnh/thành), gợi ý địa điểm + ẩm thực + hoạt động **phù hợp sở thích** + **ít phổ biến** — kèm citation nguồn | AI giỏi **tổng hợp thông tin phân mảnh** thành câu trả lời có cấu trúc. RAG chuyên biệt giải quyết đúng điểm yếu của ChatGPT generic (bịa địa điểm, thiếu data VN) | **Hallucination**: nếu RAG thiếu data → AI có thể bịa. **Coverage gap**: 171 địa điểm chưa đủ cho mọi sở thích (ẩm thực mới chiếm ~5% corpus) |
+| **Prepare** | Tự động sắp xếp địa điểm thành **lịch trình theo ngày** tối ưu khoảng cách và nhịp độ, qua hội thoại cho phép user tinh chỉnh | AI giỏi **tối ưu hóa + cá nhân hóa có constraint** (thời gian, khoảng cách, sở thích, thành phần nhóm). Đây là bài toán tốn hàng giờ nếu làm tay | **Chất lượng routing**: AI có thể sắp sai khoảng cách nếu thiếu data PostGIS. **Over-packed**: AI có xu hướng nhét quá nhiều điểm vào 1 ngày |
 
 ### Kết luận nhanh
 
 **AI leverage point quan trọng nhất của dự án tôi là:**  
-> _______________________________________________
+> **Locate → Prepare liên tục**: AI tổng hợp địa điểm phù hợp từ RAG (Locate) rồi ngay lập tức sắp xếp thành lịch trình theo ngày (Prepare) — gộp 2 bước đau nhất thành **1 bước duy nhất** qua hội thoại.
 
 **Vì sao không phải ở bước khác:**  
-> _______________________________________________
+> **Define** ít đau (user tự quyết, không cần tool). **Execute/Monitor** là khi đang đi — không phải lúc planning. **Modify** đau vừa phải và có thể giải bằng cùng cơ chế hội thoại của Locate+Prepare (hỏi lại AI để sửa lịch trình). Giá trị lớn nhất nằm ở **Locate + Prepare** vì đây là nơi user mất nhiều thời gian nhất và current alternatives fail nặng nhất.
 
 ---
 
@@ -373,13 +374,15 @@ vì [giá trị rõ nhất].
 
 ### Bản hypothesis của tôi
 
-> _______________________________________________  
-> _______________________________________________
+> Nếu chúng ta giúp **du khách nội địa tự túc** tìm và sắp xếp địa điểm thành **lịch trình cá nhân hóa** tốt hơn ở bước **Locate** và **Prepare**,  
+> bằng cách **dùng dữ liệu du lịch Việt Nam tuyển chọn (RAG) kết hợp hội thoại tự nhiên** để gộp 2 bước thành 1,  
+> thì họ sẽ chuyển từ **tự gom blog/Facebook/ChatGPT generic** sang **dùng TraVy**,  
+> vì **tiết kiệm 4–10 giờ research** mà vẫn có lịch trình chất lượng, cá nhân hóa, và đáng tin (có citation nguồn, không bịa địa điểm).
 
 ### Tín hiệu sớm nếu hypothesis này đúng
 
-1. _______________________________________________
-2. _______________________________________________
+1. User hoàn thành hội thoại tạo lịch trình mà **không cần mở tab Google/blog nào khác** để verify lại.
+2. User quay lại dùng TraVy cho chuyến đi tiếp theo hoặc **share lịch trình cho bạn bè** (organic referral).
 
 ---
 
@@ -399,15 +402,15 @@ Job story chưa có research vẫn chỉ là **giả thuyết tốt hơn**, chư
 
 | Assumption | Vì sao assumption này rủi ro? | Tôi đang có bằng chứng gì? | Cần validate bằng cách nào tiếp theo? |
 |---|---|---|---|
-| A1 | | | |
-| A2 | | | |
-| A3 | | | |
-| A4 | | | |
-| A5 | | | |
+| A1: Du khách nội địa tự túc **thật sự thấy đau** khi tự lên lịch trình (pain đủ lớn để đổi tool) | Có thể họ **thích tự research** (coi là một phần vui của chuyến đi) hoặc pain chưa đủ lớn để thay đổi hành vi | PRD ước tính 4–10h research; group Facebook du lịch có hàng triệu thành viên hỏi "đi đâu, ăn gì" → demand rõ | **Phỏng vấn 5–10 du khách**: hỏi "lần cuối bạn tự lên lịch trình mất bao lâu?" và "nếu có tool làm xong trong 5 phút, bạn có dùng không?" |
+| A2: Dữ liệu RAG tuyển chọn **tạo ra lịch trình tốt hơn** ChatGPT generic | ChatGPT đang cải thiện rất nhanh (GPT-4o, search tool); RAG 171 địa điểm có thể **không đủ coverage** — đặc biệt food_drink chỉ ~5% | Retrieval eval hit_rate 1.0, sim 0.82+ trên Hà Nội; ChatGPT không có dữ liệu giờ mở cửa/giá VN chính xác | **A/B test**: cho 10 user cùng yêu cầu, so sánh lịch trình TraVy vs ChatGPT — đo accuracy + user preference |
+| A3: User **tin kết quả AI** đủ để đi theo mà không double-check toàn bộ | Du khách rất cẩn thận với thông tin du lịch (sợ đến nơi đóng cửa, bị lừa giá); trust barrier cao với AI | TraVy có citation nguồn (khác ChatGPT generic) — nhưng chưa test user reaction | **Prototype test**: cho user đọc lịch trình TraVy (có citation) vs ChatGPT (không citation) — đo mức tin tưởng |
+| A4: **Hội thoại tự nhiên** là cách user muốn tương tác (vs. form/filter/drag-drop) | Nhiều travel app thành công dùng form (TripAdvisor, Google Travel) hoặc drag-drop (Wanderlog). Có thể user thích **nhìn map + kéo thả** hơn chat | Xu hướng AI-first UX đang tăng; nhưng chưa có data riêng. 5 câu hỏi onboarding có thể gây friction | **Usability test**: cho 5 user dùng prototype chat flow, đo completion rate và hỏi "bạn thích chat hay form hơn?" |
+| A5: User sẵn sàng **bỏ workflow cũ** (Google + blog + Facebook) nếu có giải pháp tốt hơn | Workflow cũ **miễn phí + quen thuộc**, switching cost gần 0 nhưng **inertia cao** — "tôi vẫn hay search Google thôi" | Sự phổ biến nhanh chóng của ChatGPT cho thấy user sẵn sàng đổi tool nếu nhanh + tốt hơn | **Landing page test**: đo conversion từ "describe your trip" CTA → hoàn thành lịch trình — nếu >30% hoàn thành = signal tốt |
 
 ### Assumption nguy hiểm nhất nếu tôi đang sai
 
-> _______________________________________________
+> **A1: Pain chưa đủ lớn.** Nếu du khách nội địa tự túc **thích tự research** (coi research là một phần vui) hoặc **ChatGPT generic đã đủ tốt** (pain giảm về 0 trước khi TraVy launch), thì toàn bộ hypothesis sụp — không ai cần tool chuyên biệt để giải pain đã biến mất. Đây là assumption cần validate **đầu tiên** trước khi invest thêm vào RAG/feature.
 
 ---
 
@@ -479,13 +482,13 @@ Job story chưa có research vẫn chỉ là **giả thuyết tốt hơn**, chư
 
 ## Checklist trước khi nộp
 
-- [ ] Tôi đã khoanh đúng 1 lát cắt cụ thể của dự án.
-- [ ] Tôi đã phân biệt được `job executor` với buyer / influencer.
-- [ ] `Core JTBD` của tôi không nhét solution vào câu.
-- [ ] Tôi đã viết đủ 3 `job stories`.
-- [ ] Tôi đã điền `JTBD lite map` và khoanh ra 2 bước đau nhất.
-- [ ] Tôi đã chỉ ra `AI leverage point` thay vì nhảy thẳng vào feature list.
-- [ ] Tôi đã ghi rõ `assumptions to validate`.
+- [x] Tôi đã khoanh đúng 1 lát cắt cụ thể của dự án.
+- [x] Tôi đã phân biệt được `job executor` với buyer / influencer.
+- [x] `Core JTBD` của tôi không nhét solution vào câu.
+- [x] Tôi đã viết đủ 3 `job stories`.
+- [x] Tôi đã điền `JTBD lite map` và khoanh ra 2 bước đau nhất.
+- [x] Tôi đã chỉ ra `AI leverage point` thay vì nhảy thẳng vào feature list.
+- [x] Tôi đã ghi rõ `assumptions to validate`.
 - [ ] Tôi đã sửa version cuối sau khi share trong bàn.
 
 ---
