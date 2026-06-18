@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chegg — Phân tích "tử huyệt" chiến lược trước AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26; --border: #2a2a3a;
+    --text: #e8e8f0; --text-dim: #8888a0; --accent: #ff6b35; --accent2: #ff4444;
+    --accent3: #00d4aa; --blue: #4d9fff; --purple: #a855f7; --yellow: #fbbf24;
+  }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); overflow:hidden; height:100vh; width:100vw; }
+  .slide { display:none; width:100vw; height:100vh; padding:48px 72px; position:relative; animation:fadeIn .4s ease; }
+  .slide.active { display:flex; flex-direction:column; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  .nav { position:fixed; bottom:20px; right:36px; display:flex; gap:8px; z-index:100; }
+  .nav button { background:var(--card); border:1px solid var(--border); color:var(--text); padding:8px 18px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; transition:all .2s; }
+  .nav button:hover { background:var(--border); }
+  .slide-counter { position:fixed; bottom:24px; left:36px; font-size:12px; color:var(--text-dim); font-weight:500; z-index:100; }
+  .progress-bar { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .4s ease; z-index:100; }
+
+  h1 { font-size:50px; font-weight:800; line-height:1.1; margin-bottom:14px; letter-spacing:-1.5px; }
+  h2 { font-size:32px; font-weight:700; line-height:1.2; margin-bottom:20px; letter-spacing:-.8px; }
+  h3 { font-size:20px; font-weight:600; margin-bottom:14px; letter-spacing:-.3px; }
+  .subtitle { font-size:18px; color:var(--text-dim); font-weight:400; line-height:1.5; }
+  .label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--accent); margin-bottom:10px; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .grid-4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; }
+  .flex-grow { flex:1; }
+
+  .big-num { font-size:56px; font-weight:900; letter-spacing:-2px; line-height:1; }
+  .big-num.red { color:var(--accent2); } .big-num.orange { color:var(--accent); }
+  .big-num.green { color:var(--accent3); } .big-num.blue { color:var(--blue); }
+
+  .tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:.5px; }
+  .tag.red { background:rgba(255,68,68,.15); color:var(--accent2); }
+  .tag.orange { background:rgba(255,107,53,.15); color:var(--accent); }
+  .tag.green { background:rgba(0,212,170,.15); color:var(--accent3); }
+  .tag.blue { background:rgba(77,159,255,.15); color:var(--blue); }
+  .tag.purple { background:rgba(168,85,247,.15); color:var(--purple); }
+  .tag.yellow { background:rgba(251,191,36,.15); color:var(--yellow); }
+
+  .point { padding:10px 0; border-bottom:1px solid var(--border); font-size:15px; line-height:1.5; }
+  .point:last-child { border-bottom:none; }
+  .point strong { color:var(--accent); }
+  .source { font-size:10px; color:var(--text-dim); margin-top:4px; }
+
+  .slide-title { justify-content:center; align-items:center; text-align:center; }
+  .slide-title h1 { font-size:56px; }
+
+  .verdict-box { background:linear-gradient(135deg,rgba(255,107,53,.08),rgba(255,68,68,.08)); border:2px solid var(--accent); border-radius:14px; padding:28px; margin-top:12px; }
+
+  .highlight { color:var(--accent); font-weight:600; }
+  .highlight-red { color:var(--accent2); font-weight:600; }
+  .highlight-green { color:var(--accent3); font-weight:600; }
+
+  /* Bar chart */
+  .bar-chart { display:flex; align-items:flex-end; gap:6px; padding-top:8px; flex:1; min-height:0; }
+  .bar-col { display:flex; flex-direction:column; align-items:center; flex:1; gap:4px; justify-content:flex-end; }
+  .bar { width:100%; border-radius:4px 4px 0 0; flex-shrink:0; }
+  .bar-label { font-size:10px; color:var(--text-dim); font-weight:600; white-space:nowrap; }
+  .bar-value { font-size:11px; font-weight:700; }
+
+  /* Horizontal bar */
+  .h-bar-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .h-bar-label { width:100px; font-size:12px; color:var(--text-dim); text-align:right; flex-shrink:0; font-weight:500; }
+  .h-bar-track { flex:1; height:24px; background:var(--border); border-radius:6px; overflow:hidden; position:relative; }
+  .h-bar-fill { height:100%; border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:11px; font-weight:700; transition:width .8s ease; }
+  .h-bar-row:last-child { margin-bottom:0; }
+
+  /* Donut */
+  .donut-container { display:flex; align-items:center; justify-content:center; gap:24px; }
+  .donut { width:120px; height:120px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center; }
+  .donut-inner { width:70px; height:70px; background:var(--card); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:1; }
+  .donut-num { font-size:20px; font-weight:800; }
+  .donut-label { font-size:9px; color:var(--text-dim); }
+
+  /* Timeline connector */
+  .timeline-v { position:relative; padding-left:24px; }
+  .timeline-v::before { content:''; position:absolute; left:5px; top:0; bottom:0; width:2px; background:var(--border); }
+  .tl-node { position:relative; padding-bottom:14px; }
+  .tl-node::before { content:''; position:absolute; left:-24px; top:4px; width:12px; height:12px; border-radius:50%; border:2px solid var(--border); background:var(--bg); z-index:1; }
+  .tl-node.red::before { border-color:var(--accent2); background:var(--accent2); }
+  .tl-node.orange::before { border-color:var(--accent); background:var(--accent); }
+  .tl-node.yellow::before { border-color:var(--yellow); background:var(--yellow); }
+  .tl-node.purple::before { border-color:var(--purple); background:var(--purple); }
+  .tl-node.blue::before { border-color:var(--blue); background:var(--blue); }
+  .tl-date { font-size:11px; color:var(--text-dim); font-weight:600; }
+  .tl-title { font-size:14px; font-weight:700; margin-top:2px; }
+  .tl-desc { font-size:12px; color:var(--text-dim); margin-top:2px; }
+
+  /* Comparison table */
+  .cmp-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .cmp-table th { text-align:left; padding:10px 12px; background:var(--surface); color:var(--text-dim); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); }
+  .cmp-table td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .cmp-table tr:last-child td { border-bottom:none; }
+  .cmp-table .metric { color:var(--text-dim); font-weight:500; }
+
+  /* Waterfall */
+  .wf-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .wf-label { width:110px; font-size:12px; color:var(--text-dim); text-align:right; flex-shrink:0; }
+  .wf-bar-area { flex:1; position:relative; height:28px; }
+  .wf-bar { position:absolute; height:100%; border-radius:4px; display:flex; align-items:center; padding:0 8px; font-size:11px; font-weight:700; }
+
+  @media (max-width:1200px) { .slide{padding:36px 44px;} h1{font-size:38px;} h2{font-size:26px;} .big-num{font-size:42px;} }
+</style>
+</head>
+<body>
+
+<!-- ========== SLIDE 1: TITLE ========== -->
+<div class="slide slide-title active" id="s1">
+  <div>
+    <div style="font-size:72px;margin-bottom:16px;">📉</div>
+    <div class="label">Lab 1 — Phân tích "tử huyệt" chiến lược</div>
+    <h1>Chegg vs AI</h1>
+    <p class="subtitle" style="max-width:750px;margin:0 auto;margin-top:12px;">
+      Từ <span class="highlight">$14.5B market cap</span> đến <span class="highlight-red">mất 59% subscribers</span> trong 30 tháng<br>
+      — câu chuyện khi free AI hủy business model $20/month
+    </p>
+    <div style="margin-top:20px;display:flex;justify-content:center;gap:16px;">
+      <span class="tag red">-49% stock 1 ngày</span>
+      <span class="tag orange">-30% revenue</span>
+      <span class="tag yellow">-31% subscribers YoY</span>
+      <span class="tag purple">22% layoff</span>
+    </div>
+    <div style="margin-top:36px;color:var(--text-dim);font-size:14px;">
+      <p>Nguyễn Văn Dưỡng &nbsp;·&nbsp; A20-00967 &nbsp;·&nbsp; VinUni AI Product Strategy &nbsp;·&nbsp; 18/06/2026</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 2: CHEGG BUSINESS MODEL ========== -->
+<div class="slide" id="s2">
+  <div class="label">Nhận định 1 — Giả định thắng</div>
+  <h2>Chegg trước AI: business model & moat</h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="font-size:16px;margin-bottom:10px;">💰 Revenue Model</h3>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;">
+          <div class="big-num blue" style="font-size:36px;">$20</div>
+          <div style="font-size:13px;color:var(--text-dim);line-height:1.4;">/month subscription<br>cho homework help</div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label">Subscription</div>
+          <div class="h-bar-track"><div class="h-bar-fill" style="width:78%;background:var(--blue);">78%</div></div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label">Skills/Other</div>
+          <div class="h-bar-track"><div class="h-bar-fill" style="width:22%;background:var(--purple);">22%</div></div>
+        </div>
+        <div class="source" style="margin-top:8px;">Revenue breakdown FY2022 — Chegg IR</div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:10px;">🎯 JTBD</h3>
+        <div style="padding:12px;background:rgba(168,85,247,.08);border-radius:8px;border-left:3px solid var(--purple);">
+          <p style="font-size:14px;font-weight:600;font-style:italic;">"Help me complete homework quickly without paying a tutor"</p>
+        </div>
+        <p style="font-size:12px;color:var(--text-dim);margin-top:8px;">User: sinh viên Mỹ, trả $20/month thay vì $50-100/hr cho tutor cá nhân</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="height:100%;">
+        <h3 style="font-size:16px;margin-bottom:10px;">🏰 3 Moat cũ & mức độ phòng thủ</h3>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="font-size:13px;font-weight:600;"><span class="tag blue" style="margin-right:6px;">DATA</span> Kho textbook solutions</span>
+            <span class="tag yellow">Trung bình</span>
+          </div>
+          <div class="h-bar-track" style="height:10px;"><div class="h-bar-fill" style="width:55%;background:var(--yellow);font-size:0;"></div></div>
+          <p style="font-size:11px;color:var(--text-dim);margin-top:4px;">Millions of Q&A pairs — nhưng static content, AI có thể generate real-time</p>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="font-size:13px;font-weight:600;"><span class="tag green" style="margin-right:6px;">DISTRIBUTION</span> SEO trên Google</span>
+            <span class="tag red">Yếu</span>
+          </div>
+          <div class="h-bar-track" style="height:10px;"><div class="h-bar-fill" style="width:25%;background:var(--accent2);font-size:0;"></div></div>
+          <p style="font-size:11px;color:var(--text-dim);margin-top:4px;">Phụ thuộc hoàn toàn vào Google — platform risk cao nhất</p>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="font-size:13px;font-weight:600;"><span class="tag purple" style="margin-right:6px;">NETWORK</span> Freelancer answers</span>
+            <span class="tag red">Yếu</span>
+          </div>
+          <div class="h-bar-track" style="height:10px;"><div class="h-bar-fill" style="width:20%;background:var(--accent2);font-size:0;"></div></div>
+          <p style="font-size:11px;color:var(--text-dim);margin-top:4px;">Freelancers trả lời chậm (giờ-ngày) vs AI trả lời ngay (giây)</p>
+        </div>
+        <div style="padding:10px;background:rgba(255,68,68,.06);border-radius:8px;margin-top:8px;">
+          <p style="font-size:12px;font-weight:600;color:var(--accent2);">⚠️ Giả định core: "Không có free alternative đủ tốt" — sẽ bị phá bởi ChatGPT</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 3: SUBSCRIBER COLLAPSE CHART ========== -->
+<div class="slide" id="s3">
+  <div class="label">Bằng chứng E1</div>
+  <h2>Subscriber collapse: 7.8M → 3.2M <span style="font-size:20px;color:var(--accent2);">(-59% từ đỉnh)</span></h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div class="card" style="display:flex;flex-direction:column;">
+      <h3 style="font-size:15px;margin-bottom:8px;">📊 Chegg Subscribers theo quý (triệu)</h3>
+      <div class="bar-chart">
+        <div class="bar-col"><div class="bar-value" style="color:var(--blue);">6.6</div><div class="bar" style="height:144px;background:var(--blue);"></div><div class="bar-label">Q1'22</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--blue);">6.8</div><div class="bar" style="height:148px;background:var(--blue);"></div><div class="bar-label">Q2</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--blue);">7.3</div><div class="bar" style="height:159px;background:var(--blue);"></div><div class="bar-label">Q3</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent3);">7.8</div><div class="bar" style="height:170px;background:var(--accent3);"></div><div class="bar-label">Q4</div></div>
+        <div class="bar-col" style="border-left:2px dashed var(--accent2);padding-left:4px;"><div class="bar-value" style="color:var(--yellow);">6.0</div><div class="bar" style="height:131px;background:var(--yellow);"></div><div class="bar-label">Q1'23</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent);">5.3</div><div class="bar" style="height:116px;background:var(--accent);"></div><div class="bar-label">Q2</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent);">4.9</div><div class="bar" style="height:107px;background:var(--accent);"></div><div class="bar-label">Q3</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent2);">4.5</div><div class="bar" style="height:98px;background:var(--accent2);"></div><div class="bar-label">Q4</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent2);">4.1</div><div class="bar" style="height:89px;background:var(--accent2);"></div><div class="bar-label">Q1'24</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent2);">3.7</div><div class="bar" style="height:81px;background:var(--accent2);"></div><div class="bar-label">Q2</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent2);">3.5</div><div class="bar" style="height:76px;background:var(--accent2);"></div><div class="bar-label">Q3</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent2);">3.4</div><div class="bar" style="height:74px;background:var(--accent2);"></div><div class="bar-label">Q4</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent2);">3.2</div><div class="bar" style="height:70px;background:var(--accent2);"></div><div class="bar-label">Q1'25</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;padding:6px 0;border-top:1px solid var(--border);">
+        <span style="color:var(--yellow);">← ChatGPT ra mắt 11/2022</span>
+        <span style="color:var(--accent2);">Mất 4.6M subscribers trong 30 tháng →</span>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="font-size:15px;margin-bottom:10px;">📉 Tốc độ suy giảm</h3>
+        <table class="cmp-table">
+          <tr><td class="metric">Peak</td><td><strong style="color:var(--accent3);">7.8M</strong> (Q4 2022)</td></tr>
+          <tr><td class="metric">Sau 6 tháng</td><td><strong>5.3M</strong> <span class="tag red">-32%</span></td></tr>
+          <tr><td class="metric">Sau 12 tháng</td><td><strong>4.5M</strong> <span class="tag red">-42%</span></td></tr>
+          <tr><td class="metric">Sau 24 tháng</td><td><strong>3.4M</strong> <span class="tag red">-56%</span></td></tr>
+          <tr><td class="metric">Q1 2025</td><td><strong style="color:var(--accent2);">3.2M</strong> <span class="tag red">-59%</span></td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:8px;">💵 Revenue impact tương ứng</h3>
+        <div style="display:flex;gap:12px;">
+          <div style="flex:1;text-align:center;padding:10px;background:rgba(77,159,255,.06);border-radius:8px;">
+            <div style="font-size:11px;color:var(--text-dim);">Peak ARR ước tính</div>
+            <div style="font-size:22px;font-weight:800;color:var(--blue);margin-top:4px;">~$767M</div>
+            <div style="font-size:10px;color:var(--text-dim);">7.8M × $98.4/yr</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:10px;background:rgba(255,68,68,.06);border-radius:8px;">
+            <div style="font-size:11px;color:var(--text-dim);">Q1'25 run rate</div>
+            <div style="font-size:22px;font-weight:800;color:var(--accent2);margin-top:4px;">~$484M</div>
+            <div style="font-size:10px;color:var(--text-dim);">$121M × 4 qtrs</div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:8px;font-size:13px;font-weight:600;color:var(--accent2);">Mất ~$283M ARR ước tính</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:8px;text-align:right;"><span class="source">Nguồn: Chegg Earnings Reports via CNBC, LinkedIn — Glenn Gabe</span></div>
+</div>
+
+<!-- ========== SLIDE 4: STOCK + REVENUE DUAL SHOCK ========== -->
+<div class="slide" id="s4">
+  <div class="label">Bằng chứng E2, E3, E4</div>
+  <h2>Triple shock: Stock, Revenue, Workforce</h2>
+  <div class="grid-3 flex-grow" style="margin-top:4px;">
+    <!-- Stock -->
+    <div class="card" style="display:flex;flex-direction:column;">
+      <div class="tag red" style="margin-bottom:8px;align-self:flex-start;">E2 — STOCK CRASH</div>
+      <div style="text-align:center;margin:auto 0;">
+        <div class="big-num red" style="font-size:52px;">-49%</div>
+        <div style="font-size:14px;color:var(--text);font-weight:600;margin-top:8px;">trong 1 ngày duy nhất</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px;">2 tháng 5, 2023</div>
+      </div>
+      <div style="margin-top:auto;">
+        <div style="padding:10px;background:rgba(255,68,68,.06);border-radius:8px;">
+          <p style="font-size:12px;color:var(--text-dim);line-height:1.5;">
+            CEO Dan Rosensweig thừa nhận trên earnings call: <em style="color:var(--text);">"ChatGPT is having an impact on our new customer growth rate"</em>
+          </p>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text-dim);">
+          <span>Market cap pre-crash: ~$3.6B</span>
+          <span style="color:var(--accent2);">Post: ~$1.8B</span>
+        </div>
+        <div class="source">Nguồn: Fortune</div>
+      </div>
+    </div>
+    <!-- Revenue -->
+    <div class="card" style="display:flex;flex-direction:column;">
+      <div class="tag orange" style="margin-bottom:8px;align-self:flex-start;">E3 — REVENUE DECLINE</div>
+      <h3 style="font-size:14px;margin-bottom:8px;">Revenue theo quý ($M)</h3>
+      <div class="bar-chart">
+        <div class="bar-col"><div class="bar-value" style="color:var(--blue);font-size:10px;">198</div><div class="bar" style="height:130px;background:var(--blue);"></div><div class="bar-label">Q1'23</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--blue);font-size:10px;">183</div><div class="bar" style="height:120px;background:var(--blue);"></div><div class="bar-label">Q2</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent);font-size:10px;">158</div><div class="bar" style="height:104px;background:var(--accent);"></div><div class="bar-label">Q3</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent);font-size:10px;">148</div><div class="bar" style="height:97px;background:var(--accent);"></div><div class="bar-label">Q4</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent2);font-size:10px;">135</div><div class="bar" style="height:89px;background:var(--accent2);"></div><div class="bar-label">Q1'24</div></div>
+        <div class="bar-col"><div class="bar-value" style="color:var(--accent2);font-size:10px;">121</div><div class="bar" style="height:80px;background:var(--accent2);"></div><div class="bar-label">Q1'25</div></div>
+      </div>
+      <div style="margin-top:8px;text-align:center;padding:8px;background:rgba(255,68,68,.06);border-radius:8px;">
+        <span style="font-size:12px;font-weight:600;color:var(--accent2);">-39% trong 8 quý &nbsp;|&nbsp; -30% YoY Q1'25</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Subscription revenue Q1'25: $108M (gần -1/3)</div>
+      <div class="source">Nguồn: LinkedIn — Glenn Gabe</div>
+    </div>
+    <!-- Layoff -->
+    <div class="card" style="display:flex;flex-direction:column;">
+      <div class="tag orange" style="margin-bottom:8px;align-self:flex-start;">E4 — LAYOFF</div>
+      <div style="text-align:center;margin:auto 0;">
+        <div class="big-num orange" style="font-size:52px;">248</div>
+        <div style="font-size:14px;color:var(--text);font-weight:600;margin-top:8px;">employees bị sa thải</div>
+        <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">= <strong style="color:var(--accent);">22%</strong> toàn bộ workforce</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Tháng 5/2025</div>
+      </div>
+      <div style="margin-top:auto;">
+        <h3 style="font-size:13px;margin-bottom:6px;">Headcount trajectory</h3>
+        <div class="h-bar-row">
+          <div class="h-bar-label" style="width:70px;">2022</div>
+          <div class="h-bar-track"><div class="h-bar-fill" style="width:100%;background:var(--blue);">~1,900</div></div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label" style="width:70px;">2024</div>
+          <div class="h-bar-track"><div class="h-bar-fill" style="width:60%;background:var(--accent);">~1,130</div></div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label" style="width:70px;">5/2025</div>
+          <div class="h-bar-track"><div class="h-bar-fill" style="width:47%;background:var(--accent2);">~882</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-top:6px;text-align:center;">-54% workforce từ đỉnh</div>
+        <div class="source">Nguồn: CNBC</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 5: AI SHOCK TIMELINE ========== -->
+<div class="slide" id="s5">
+  <div class="label">AI Shock Timeline</div>
+  <h2>30 tháng sụp đổ: từ ChatGPT đến kiện Google</h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div class="card">
+      <div class="timeline-v">
+        <div class="tl-node yellow">
+          <div class="tl-date">11/2022</div>
+          <div class="tl-title">ChatGPT ra mắt</div>
+          <div class="tl-desc">Free AI trả lời homework ngay lập tức. Students bắt đầu rời Chegg.</div>
+        </div>
+        <div class="tl-node red">
+          <div class="tl-date">02/05/2023</div>
+          <div class="tl-title">Stock crash -49% trong 1 ngày</div>
+          <div class="tl-desc">CEO thừa nhận trên earnings call. Thị trường phản ứng tức thì.</div>
+        </div>
+        <div class="tl-node orange">
+          <div class="tl-date">Q3 2023</div>
+          <div class="tl-title">CheggMate (AI product) ra mắt</div>
+          <div class="tl-desc">Analysts: "sẽ không có meaningful impact until FY2024". Quá muộn.</div>
+        </div>
+        <div class="tl-node purple">
+          <div class="tl-date">03/2024</div>
+          <div class="tl-title">GPT-4o free + Google Gemini</div>
+          <div class="tl-desc">AI chất lượng cao trở thành free. Khoảng cách Chegg vs free AI ngày càng rộng.</div>
+        </div>
+        <div class="tl-node blue">
+          <div class="tl-date">02/2025</div>
+          <div class="tl-title">Chegg kiện Google</div>
+          <div class="tl-desc">Google AI Overviews answers trực tiếp trên search → cut traffic.</div>
+        </div>
+        <div class="tl-node red">
+          <div class="tl-date">05/2025</div>
+          <div class="tl-title">Layoff 22% (248 người)</div>
+          <div class="tl-desc">Revenue -30%. Subscribers còn 3.2M. Survival mode.</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card" style="flex:1;">
+        <h3 style="font-size:15px;margin-bottom:10px;">⏱️ Tốc độ phản ứng: Chegg vs ChatGPT</h3>
+        <table class="cmp-table">
+          <tr><td class="metric">Thời gian trả lời</td><td><strong style="color:var(--accent2);">Giờ — Ngày</strong> (freelancer)</td><td><strong style="color:var(--accent3);">2-10 giây</strong></td></tr>
+          <tr><td class="metric">Giá</td><td><strong style="color:var(--accent2);">$20/month</strong></td><td><strong style="color:var(--accent3);">$0</strong> (free tier)</td></tr>
+          <tr><td class="metric">Loại câu hỏi</td><td>Textbook có sẵn</td><td><strong style="color:var(--accent3);">Bất kỳ</strong></td></tr>
+          <tr><td class="metric">Giải thích</td><td>Copy-paste answers</td><td><strong style="color:var(--accent3);">Step-by-step</strong></td></tr>
+        </table>
+        <div style="text-align:center;margin-top:10px;padding:8px;background:rgba(0,212,170,.06);border-radius:8px;">
+          <span style="font-size:12px;font-weight:600;color:var(--accent3);">ChatGPT: nhanh hơn 1000x, rẻ hơn ∞, đa dạng hơn</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15px;margin-bottom:8px;">🔍 Platform Risk: Google bước xuống <span class="tag purple">E5</span></h3>
+        <div style="display:flex;gap:12px;">
+          <div style="flex:1;padding:10px;background:rgba(255,68,68,.06);border-radius:8px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-dim);">Trước AI Overviews</div>
+            <div style="font-size:24px;margin:6px 0;">🔍 → 📄</div>
+            <div style="font-size:11px;color:var(--text);">Google → click Chegg</div>
+          </div>
+          <div style="display:flex;align-items:center;font-size:20px;color:var(--accent2);">→</div>
+          <div style="flex:1;padding:10px;background:rgba(255,68,68,.06);border-radius:8px;text-align:center;">
+            <div style="font-size:11px;color:var(--text-dim);">Sau AI Overviews</div>
+            <div style="font-size:24px;margin:6px 0;">🔍 = ✅</div>
+            <div style="font-size:11px;color:var(--accent2);">Google answers trực tiếp</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">Chegg kiện Google 02/2025 — nhưng không thể kiện technology shift</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 6: 2 LỰC PHÁ HỦY — FRAMEWORK ========== -->
+<div class="slide" id="s6">
+  <div class="label">Nhận định 2 — Kỳ vọng & Competitive Dynamics</div>
+  <h2>2 lực phá hủy đồng thời: Expectation Shift + Competitive Dynamics</h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div class="card" style="border-left:3px solid var(--accent2);">
+      <h3 style="font-size:16px;">📈 3 Expectation Shifts đánh trúng Chegg</h3>
+      <table class="cmp-table" style="margin-top:8px;">
+        <thead><tr><th>Shift</th><th>Trước AI</th><th>Sau AI</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="tag red">1</span> Làm xong giúp tôi</td>
+            <td style="color:var(--text-dim);">Tự tìm answer trong kho Chegg</td>
+            <td><strong style="color:var(--accent3);">AI giải bài trọn vẹn, step-by-step</strong></td>
+          </tr>
+          <tr>
+            <td><span class="tag orange">2</span> Phản hồi ngay</td>
+            <td style="color:var(--text-dim);">Chờ freelancer: giờ → ngày</td>
+            <td><strong style="color:var(--accent3);">ChatGPT: 2-10 giây</strong></td>
+          </tr>
+          <tr>
+            <td><span class="tag yellow">3</span> Trả theo kết quả</td>
+            <td style="color:var(--text-dim);">$20/month cố định</td>
+            <td><strong style="color:var(--accent3);">$0 — free tier đủ tốt</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px;background:rgba(255,68,68,.06);border-radius:8px;">
+        <p style="font-size:12px;font-weight:600;color:var(--accent2);">User không chỉ muốn rẻ hơn — họ muốn workflow hoàn toàn khác</p>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--accent);">
+      <h3 style="font-size:16px;">⚔️ 3 Competitive Dynamics phá moat</h3>
+      <table class="cmp-table" style="margin-top:8px;">
+        <thead><tr><th>Dynamic</th><th>Tác động lên Chegg</th><th>Mức phá</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="tag red">Switching costs ↓</span></td>
+            <td>$20/month → $0 &nbsp; <strong style="color:var(--accent2);">barrier biến mất</strong></td>
+            <td><span class="tag red">FATAL</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag orange">Platform risk</span></td>
+            <td>Google AI Overviews cut traffic; <strong>SEO moat vô nghĩa</strong></td>
+            <td><span class="tag red">FATAL</span></td>
+          </tr>
+          <tr>
+            <td><span class="tag yellow">Build-copy ↑↑</span></td>
+            <td>CheggMate copy AI nhưng <strong>launch quá chậm</strong>, không AI-native</td>
+            <td><span class="tag orange">HIGH</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;padding:10px;background:rgba(255,107,53,.06);border-radius:8px;">
+        <p style="font-size:12px;font-weight:600;color:var(--accent);">2 trong 3 dynamics = FATAL → business model không thể phục hồi theo cách cũ</p>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px;padding:14px;">
+    <div style="display:flex;justify-content:space-around;text-align:center;">
+      <div><div style="font-size:11px;color:var(--text-dim);">Switching cost</div><div style="font-size:20px;font-weight:800;color:var(--accent2);margin-top:4px;">$20 → $0</div></div>
+      <div style="color:var(--border);font-size:20px;">+</div>
+      <div><div style="font-size:11px;color:var(--text-dim);">Response time</div><div style="font-size:20px;font-weight:800;color:var(--accent2);margin-top:4px;">Giờ → Giây</div></div>
+      <div style="color:var(--border);font-size:20px;">+</div>
+      <div><div style="font-size:11px;color:var(--text-dim);">Entry point</div><div style="font-size:20px;font-weight:800;color:var(--accent2);margin-top:4px;">Google → AI</div></div>
+      <div style="color:var(--border);font-size:20px;">=</div>
+      <div><div style="font-size:11px;color:var(--text-dim);">Kết quả</div><div style="font-size:20px;font-weight:800;color:var(--accent2);margin-top:4px;">-59% subs</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 7: THAY ĐỔI VĨNH VIỄN ========== -->
+<div class="slide" id="s7">
+  <div class="label">Nhận định 3 — Thay đổi vĩnh viễn</div>
+  <h2>3 giả định chết vĩnh viễn, không quay lại</h2>
+  <div class="grid-3 flex-grow" style="margin-top:4px;">
+    <div class="card" style="border-top:3px solid var(--accent2);display:flex;flex-direction:column;">
+      <div style="text-align:center;">
+        <span style="font-size:32px;">💀</span>
+        <h3 style="font-size:15px;margin-top:8px;color:var(--accent2);">Giả định 1: "Phải trả tiền"</h3>
+      </div>
+      <div style="margin:12px 0;flex:1;">
+        <div style="padding:10px;background:rgba(77,159,255,.06);border-radius:6px;margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--text-dim);">Trước</div>
+          <p style="font-size:13px;">"Không có free alternative đủ tốt cho homework help"</p>
+        </div>
+        <div style="text-align:center;color:var(--accent2);font-size:16px;padding:2px;">⬇</div>
+        <div style="padding:10px;background:rgba(255,68,68,.06);border-radius:6px;">
+          <div style="font-size:11px;color:var(--text-dim);">Sau</div>
+          <p style="font-size:13px;"><strong style="color:var(--accent2);">"Free AI đủ tốt, thậm chí tốt hơn Chegg"</strong></p>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);padding:8px;background:var(--surface);border-radius:6px;">
+        <strong>Bằng chứng:</strong> 4.6M students rời đi trong 30 tháng — không quay lại dù CheggMate ra mắt
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--accent);display:flex;flex-direction:column;">
+      <div style="text-align:center;">
+        <span style="font-size:32px;">🚪</span>
+        <h3 style="font-size:15px;margin-top:8px;color:var(--accent);">Giả định 2: "Entry point = Google"</h3>
+      </div>
+      <div style="margin:12px 0;flex:1;">
+        <div style="padding:10px;background:rgba(77,159,255,.06);border-radius:6px;margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--text-dim);">Trước</div>
+          <p style="font-size:13px;">"Students search Google → land on Chegg"</p>
+        </div>
+        <div style="text-align:center;color:var(--accent);font-size:16px;padding:2px;">⬇</div>
+        <div style="padding:10px;background:rgba(255,107,53,.06);border-radius:6px;">
+          <div style="font-size:11px;color:var(--text-dim);">Sau</div>
+          <p style="font-size:13px;"><strong style="color:var(--accent);">"Students mở ChatGPT trước, không search Google"</strong></p>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);padding:8px;background:var(--surface);border-radius:6px;">
+        <strong>Bằng chứng:</strong> Google AI Overviews + ChatGPT đều bypass Chegg. Chegg kiện Google (02/2025)
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);display:flex;flex-direction:column;">
+      <div style="text-align:center;">
+        <span style="font-size:32px;">⚰️</span>
+        <h3 style="font-size:15px;margin-top:8px;color:var(--purple);">Giả định 3: "Phân khúc tồn tại"</h3>
+      </div>
+      <div style="margin:12px 0;flex:1;">
+        <div style="padding:10px;background:rgba(77,159,255,.06);border-radius:6px;margin-bottom:8px;">
+          <div style="font-size:11px;color:var(--text-dim);">Trước</div>
+          <p style="font-size:13px;">"Consumer paid homework help là thị trường lớn, bền"</p>
+        </div>
+        <div style="text-align:center;color:var(--purple);font-size:16px;padding:2px;">⬇</div>
+        <div style="padding:10px;background:rgba(168,85,247,.06);border-radius:6px;">
+          <div style="font-size:11px;color:var(--text-dim);">Sau</div>
+          <p style="font-size:13px;"><strong style="color:var(--purple);">"Phân khúc bị absorb bởi general-purpose AI"</strong></p>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);padding:8px;background:var(--surface);border-radius:6px;">
+        <strong>Bằng chứng:</strong> Không ai xây "Chegg mới" — vì ChatGPT/Gemini đã cover job này
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px;text-align:center;padding:14px;background:rgba(255,68,68,.04);border-color:var(--accent2);">
+    <p style="font-size:14px;font-weight:600;">Đây không phải "triệu chứng" (stock giảm, layoff) — đây là <span class="highlight-red">chuẩn mới vĩnh viễn</span> trong đầu 20M+ students Mỹ</p>
+  </div>
+</div>
+
+<!-- ========== SLIDE 8: SO SÁNH 3 CASE TRONG BÀN ========== -->
+<div class="slide" id="s8">
+  <div class="label">Share trong bàn — So sánh 3 case</div>
+  <h2>Chegg vs Canva vs Stack Overflow: ai sống, ai chết, vì sao?</h2>
+  <div class="flex-grow" style="margin-top:4px;">
+    <div class="card" style="margin-bottom:14px;">
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th style="width:130px;"></th>
+            <th>🔴 Chegg <span class="tag red">Tôi</span></th>
+            <th>🟡 Canva <span class="tag blue">Bạn 1</span></th>
+            <th>🟠 Stack Overflow <span class="tag blue">Bạn 2</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="metric">AI Shock</td>
+            <td>ChatGPT + Google AI Overviews</td>
+            <td>Adobe Firefly + ChatGPT + Midjourney</td>
+            <td>ChatGPT + GitHub Copilot</td>
+          </tr>
+          <tr>
+            <td class="metric">Subscriber/Traffic</td>
+            <td><strong style="color:var(--accent2);">-59%</strong> subs (7.8M→3.2M)</td>
+            <td><span style="color:var(--accent3);">+30%</span> MAU (tích hợp AI)</td>
+            <td><strong style="color:var(--accent2);">-35%</strong> traffic (SimilarWeb)</td>
+          </tr>
+          <tr>
+            <td class="metric">Revenue impact</td>
+            <td><strong style="color:var(--accent2);">-30%</strong> YoY ($121M Q1'25)</td>
+            <td><span style="color:var(--accent3);">+40%</span> ARR ($2.3B, 2024)</td>
+            <td><strong style="color:var(--accent2);">-15%</strong> est. (ad revenue drop)</td>
+          </tr>
+          <tr>
+            <td class="metric">Layoff</td>
+            <td><strong style="color:var(--accent2);">22%</strong> (248 người, 05/2025)</td>
+            <td>Không layoff, đang hiring</td>
+            <td><strong style="color:var(--accent2);">28%</strong> (10/2023)</td>
+          </tr>
+          <tr>
+            <td class="metric">AI response</td>
+            <td style="color:var(--accent2);">CheggMate — quá chậm, bolt-on</td>
+            <td style="color:var(--accent3);">Magic Studio — AI-native, in-workflow</td>
+            <td style="color:var(--accent2);">OverflowAI — limited adoption</td>
+          </tr>
+          <tr>
+            <td class="metric">Moat còn?</td>
+            <td><span class="tag red">DATA — không đủ</span></td>
+            <td><span class="tag green">WORKFLOW — mạnh</span></td>
+            <td><span class="tag red">NETWORK — bị đảo chiều</span></td>
+          </tr>
+          <tr>
+            <td class="metric">Verdict</td>
+            <td><strong style="color:var(--accent);">Pivot hoàn toàn → B2B</strong></td>
+            <td><strong style="color:var(--accent3);">Sống — tích hợp AI</strong></td>
+            <td><strong style="color:var(--accent2);">Khó cứu — moat hủy</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-3">
+      <div class="card" style="padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">Tốc độ phản ứng</div>
+        <div class="h-bar-row" style="margin-bottom:6px;">
+          <div class="h-bar-label" style="width:55px;font-size:11px;">Canva</div>
+          <div class="h-bar-track" style="height:16px;"><div class="h-bar-fill" style="width:90%;background:var(--accent3);font-size:10px;">Nhanh</div></div>
+        </div>
+        <div class="h-bar-row" style="margin-bottom:6px;">
+          <div class="h-bar-label" style="width:55px;font-size:11px;">StackOF</div>
+          <div class="h-bar-track" style="height:16px;"><div class="h-bar-fill" style="width:35%;background:var(--accent2);font-size:10px;">Chậm</div></div>
+        </div>
+        <div class="h-bar-row" style="margin-bottom:0;">
+          <div class="h-bar-label" style="width:55px;font-size:11px;">Chegg</div>
+          <div class="h-bar-track" style="height:16px;"><div class="h-bar-fill" style="width:20%;background:var(--accent2);font-size:10px;">Rất chậm</div></div>
+        </div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;text-align:center;">Vì sao Canva sống?</div>
+        <div style="font-size:12px;line-height:1.6;">
+          <div style="margin-bottom:4px;">✅ Tích hợp AI <strong>vào workflow</strong> (không bolt-on)</div>
+          <div style="margin-bottom:4px;">✅ Tăng giá Teams 300% để <strong>fund AI R&D</strong></div>
+          <div>✅ <strong>Switching cost thực</strong>: teams đã build assets trong Canva</div>
+        </div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;text-align:center;">Pattern chung cả 3 case</div>
+        <div style="font-size:12px;line-height:1.6;">
+          <div style="margin-bottom:4px;"><span class="tag red" style="font-size:9px;">1</span> Switching costs <strong>giảm</strong></div>
+          <div style="margin-bottom:4px;"><span class="tag orange" style="font-size:9px;">2</span> Entry point <strong>dịch chuyển sang AI</strong></div>
+          <div style="margin-bottom:4px;"><span class="tag yellow" style="font-size:9px;">3</span> Platform <strong>bước xuống app layer</strong></div>
+          <div><span class="tag purple" style="font-size:9px;">4</span> "Làm xong giúp tôi" = <strong>chuẩn mới</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 9: VERDICT + PM PLAN ========== -->
+<div class="slide" id="s9">
+  <div class="label">Nhận định 4 — Verdict</div>
+  <h2>Có thể cứu — nhưng phải <span style="color:var(--accent);">pivot hoàn toàn</span></h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div>
+      <div class="verdict-box" style="margin-top:0;padding:20px;">
+        <h3 style="font-size:15px;color:var(--accent2);margin-bottom:10px;">Tổn thương vì</h3>
+        <div style="font-size:13px;line-height:1.6;margin-bottom:14px;">
+          Switching costs <strong>$20→$0</strong> + platform risk (Google AI Overviews). Business model paid subscription homework help <strong>không thể phục hồi</strong>.
+        </div>
+        <h3 style="font-size:15px;color:var(--accent);margin-bottom:10px;">Thay đổi vĩnh viễn</h3>
+        <div style="font-size:13px;line-height:1.6;margin-bottom:14px;">
+          Chuẩn mới: <strong>"Free AI đủ tốt"</strong>. Entry point biến mất. Consumer homework help subscription <strong>đã chết</strong>.
+        </div>
+        <h3 style="font-size:15px;color:var(--accent3);margin-bottom:10px;">Path cứu được</h3>
+        <div style="font-size:13px;line-height:1.6;">
+          Pivot <strong>consumer → B2B skilling</strong> (Busuu acquisition). License proprietary data cho enterprise AI tools. Bài học từ Canva: <strong>tích hợp AI vào workflow, không bolt-on</strong>.
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px;padding:14px;">
+        <h3 style="font-size:14px;margin-bottom:8px;">📊 Chegg vs đối thủ phản ứng</h3>
+        <table class="cmp-table" style="font-size:12px;">
+          <tr><td class="metric">OpenAI</td><td><span class="tag green">Chiếm entry point</span> — students ask ChatGPT first</td></tr>
+          <tr><td class="metric">Google</td><td><span class="tag green">AI Overviews</span> — answers trên search, bypass Chegg</td></tr>
+          <tr><td class="metric">Canva</td><td><span class="tag green">AI-native workflow</span> — Magic Studio tích hợp sâu</td></tr>
+          <tr><td class="metric">Chegg</td><td><span class="tag red">CheggMate bolt-on</span> — quá chậm, uncertain monetization</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="height:100%;display:flex;flex-direction:column;">
+        <h3 style="font-size:15px;">🗓️ Nếu tôi là PM — 6-Month Turnaround Plan</h3>
+        <div style="flex:1;margin-top:8px;">
+          <div style="padding:14px;background:rgba(255,68,68,.06);border-radius:8px;margin-bottom:10px;border-left:3px solid var(--accent2);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-weight:700;font-size:13px;color:var(--accent2);">Phase 1: Stop the bleeding</div>
+              <span class="tag red">Month 1–2</span>
+            </div>
+            <ul style="font-size:12px;color:var(--text-dim);margin-top:6px;padding-left:16px;line-height:1.6;">
+              <li>Freeze consumer homework help investment</li>
+              <li>Acquire/build enterprise learning platform (Busuu deal)</li>
+              <li>Redirect 40% eng team to B2B product</li>
+            </ul>
+          </div>
+          <div style="padding:14px;background:rgba(255,107,53,.06);border-radius:8px;margin-bottom:10px;border-left:3px solid var(--accent);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-weight:700;font-size:13px;color:var(--accent);">Phase 2: Build new moat</div>
+              <span class="tag orange">Month 3–4</span>
+            </div>
+            <ul style="font-size:12px;color:var(--text-dim);margin-top:6px;padding-left:16px;line-height:1.6;">
+              <li>License proprietary Q&A data → enterprise AI training</li>
+              <li>Build assessment/certification tools (AI-graded)</li>
+              <li>Cut consumer team, reallocate to enterprise GTM</li>
+            </ul>
+          </div>
+          <div style="padding:14px;background:rgba(0,212,170,.06);border-radius:8px;border-left:3px solid var(--accent3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-weight:700;font-size:13px;color:var(--accent3);">Phase 3: Launch & communicate</div>
+              <span class="tag green">Month 5–6</span>
+            </div>
+            <ul style="font-size:12px;color:var(--text-dim);margin-top:6px;padding-left:16px;line-height:1.6;">
+              <li>Launch B2B product (per-employee/per-course pricing)</li>
+              <li>Investor day: communicate pivot narrative</li>
+              <li>Target: 50 enterprise pilots by month 6</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 10: TAKEAWAY ========== -->
+<div class="slide" id="s10">
+  <div class="label">Takeaway cho dự án nhóm</div>
+  <h2>Chegg Autopsy: 3 bài học sống còn</h2>
+  <div class="grid-3 flex-grow" style="margin-top:4px;">
+    <div class="card" style="border-top:3px solid var(--accent2);display:flex;flex-direction:column;">
+      <div style="text-align:center;padding:8px 0;">
+        <span style="font-size:36px;">🔴</span>
+        <h3 style="font-size:16px;margin-top:8px;color:var(--accent2);">Moat Test</h3>
+      </div>
+      <div style="flex:1;font-size:13px;line-height:1.6;color:var(--text-dim);">
+        <p>Hỏi: <strong style="color:var(--text);">"Nếu free AI làm được 80% giá trị core product, user có ở lại không?"</strong></p>
+        <div style="margin-top:12px;padding:10px;background:rgba(255,68,68,.06);border-radius:6px;">
+          <div style="font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Chegg failed test này:</div>
+          <p style="font-size:11px;">ChatGPT làm 90%+ homework help. Zero reason to stay at $20/month.</p>
+        </div>
+      </div>
+      <div style="padding:10px;background:var(--surface);border-radius:6px;margin-top:auto;">
+        <p style="font-size:12px;font-weight:600;">✅ Build value AI <em>cannot</em> replicate: workflow data, team collaboration, compliance</p>
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--accent);display:flex;flex-direction:column;">
+      <div style="text-align:center;padding:8px 0;">
+        <span style="font-size:36px;">🟠</span>
+        <h3 style="font-size:16px;margin-top:8px;color:var(--accent);">Speed Test</h3>
+      </div>
+      <div style="flex:1;font-size:13px;line-height:1.6;color:var(--text-dim);">
+        <p>Hỏi: <strong style="color:var(--text);">"Nếu AI disruption xảy ra hôm nay, team mình có thể pivot trong 3 tháng không?"</strong></p>
+        <div style="margin-top:12px;padding:10px;background:rgba(255,107,53,.06);border-radius:6px;">
+          <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:4px;">Chegg failed test này:</div>
+          <p style="font-size:11px;">CheggMate launch 10 tháng sau ChatGPT. Analysts: "no meaningful impact". Quá chậm.</p>
+        </div>
+      </div>
+      <div style="padding:10px;background:var(--surface);border-radius:6px;margin-top:auto;">
+        <p style="font-size:12px;font-weight:600;">✅ Học từ Canva: tích hợp AI <em>vào</em> workflow ngay, không bolt-on sau</p>
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--accent3);display:flex;flex-direction:column;">
+      <div style="text-align:center;padding:8px 0;">
+        <span style="font-size:36px;">🟢</span>
+        <h3 style="font-size:16px;margin-top:8px;color:var(--accent3);">Platform Test</h3>
+      </div>
+      <div style="flex:1;font-size:13px;line-height:1.6;color:var(--text-dim);">
+        <p>Hỏi: <strong style="color:var(--text);">"Nếu platform chính (Google, Apple) bước xuống app layer, mình còn distribution không?"</strong></p>
+        <div style="margin-top:12px;padding:10px;background:rgba(0,212,170,.06);border-radius:6px;">
+          <div style="font-size:11px;font-weight:600;color:var(--accent3);margin-bottom:4px;">Chegg failed test này:</div>
+          <p style="font-size:11px;">100% distribution qua Google SEO. Google AI Overviews = game over. Kiện cũng không cứu.</p>
+        </div>
+      </div>
+      <div style="padding:10px;background:var(--surface);border-radius:6px;margin-top:auto;">
+        <p style="font-size:12px;font-weight:600;">✅ Own your distribution: direct, enterprise, API — không "đất thuê"</p>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px;text-align:center;padding:14px;border-color:var(--accent3);">
+    <p style="font-size:15px;font-weight:700;color:var(--accent3);">
+      Nếu dự án fail cả 3 test → phải redesign moat TRƯỚC khi ship, không phải sau khi mất user
+    </p>
+  </div>
+</div>
+
+<!-- ========== SLIDE 11: THANK YOU ========== -->
+<div class="slide slide-title" id="s11">
+  <div>
+    <div style="font-size:56px;margin-bottom:12px;">🎯</div>
+    <h1 style="font-size:44px;">Cảm ơn!</h1>
+    <p class="subtitle" style="max-width:600px;margin:12px auto 0;">
+      "Không có bằng chứng = không có nhận định"
+    </p>
+    <div style="margin-top:32px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+      <span class="tag blue">E1: Subs 7.8M→3.2M</span>
+      <span class="tag red">E2: Stock -49% 1 ngày</span>
+      <span class="tag orange">E3: Revenue -30%</span>
+      <span class="tag yellow">E4: Layoff 22%</span>
+      <span class="tag purple">E5: Kiện Google</span>
+    </div>
+    <div style="margin-top:32px;color:var(--text-dim);font-size:13px;">
+      <p>Nguyễn Văn Dưỡng &nbsp;·&nbsp; A20-00967 &nbsp;·&nbsp; VinUni AI Product Strategy &nbsp;·&nbsp; 18/06/2026</p>
+      <p style="margin-top:6px;font-size:11px;">Nguồn: Chegg IR · CNBC · Fortune · LinkedIn (Glenn Gabe, Herman Singh) · SimilarWeb</p>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">11</span></div>
+<div class="nav">
+  <button onclick="prev()">← Trước</button>
+  <button onclick="next()">Tiếp →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    document.getElementById('currentSlide').textContent = current + 1;
+    document.getElementById('totalSlides').textContent = slides.length;
+    document.getElementById('progressBar').style.width = ((current+1)/slides.length*100)+'%';
+  }
+  function next() { showSlide(current+1); }
+  function prev() { showSlide(current-1); }
+  document.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); next(); }
+    if (e.key==='ArrowLeft') { e.preventDefault(); prev(); }
+  });
+  showSlide(0);
+</script>
+</body>
+</html>
