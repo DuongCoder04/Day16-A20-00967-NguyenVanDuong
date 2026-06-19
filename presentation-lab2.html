@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab 2 — JTBD Project Analysis: TraVy</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --card: #1a1a26; --border: #2a2a3a;
+    --text: #e8e8f0; --text-dim: #8888a0; --accent: #ff6b35; --accent2: #ff4444;
+    --accent3: #00d4aa; --blue: #4d9fff; --purple: #a855f7; --yellow: #fbbf24;
+    --cyan: #22d3ee;
+  }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); overflow:hidden; height:100vh; width:100vw; }
+  .slide { display:none; width:100vw; height:100vh; padding:48px 72px; position:relative; animation:fadeIn .4s ease; }
+  .slide.active { display:flex; flex-direction:column; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  .nav { position:fixed; bottom:20px; right:36px; display:flex; gap:8px; z-index:100; }
+  .nav button { background:var(--card); border:1px solid var(--border); color:var(--text); padding:8px 18px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif; font-size:13px; font-weight:500; transition:all .2s; }
+  .nav button:hover { background:var(--border); }
+  .slide-counter { position:fixed; bottom:24px; left:36px; font-size:12px; color:var(--text-dim); font-weight:500; z-index:100; }
+  .progress-bar { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,var(--accent3),var(--cyan)); transition:width .4s ease; z-index:100; }
+
+  h1 { font-size:50px; font-weight:800; line-height:1.1; margin-bottom:14px; letter-spacing:-1.5px; }
+  h2 { font-size:32px; font-weight:700; line-height:1.2; margin-bottom:20px; letter-spacing:-.8px; }
+  h3 { font-size:20px; font-weight:600; margin-bottom:14px; letter-spacing:-.3px; }
+  .subtitle { font-size:18px; color:var(--text-dim); font-weight:400; line-height:1.5; }
+  .label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--accent3); margin-bottom:10px; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .grid-4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; }
+  .flex-grow { flex:1; }
+
+  .big-num { font-size:56px; font-weight:900; letter-spacing:-2px; line-height:1; }
+  .big-num.red { color:var(--accent2); } .big-num.orange { color:var(--accent); }
+  .big-num.green { color:var(--accent3); } .big-num.blue { color:var(--blue); }
+
+  .tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:.5px; }
+  .tag.red { background:rgba(255,68,68,.15); color:var(--accent2); }
+  .tag.orange { background:rgba(255,107,53,.15); color:var(--accent); }
+  .tag.green { background:rgba(0,212,170,.15); color:var(--accent3); }
+  .tag.blue { background:rgba(77,159,255,.15); color:var(--blue); }
+  .tag.purple { background:rgba(168,85,247,.15); color:var(--purple); }
+  .tag.yellow { background:rgba(251,191,36,.15); color:var(--yellow); }
+  .tag.cyan { background:rgba(34,211,238,.15); color:var(--cyan); }
+
+  .point { padding:10px 0; border-bottom:1px solid var(--border); font-size:15px; line-height:1.5; }
+  .point:last-child { border-bottom:none; }
+  .point strong { color:var(--accent3); }
+
+  .slide-title { justify-content:center; align-items:center; text-align:center; }
+  .slide-title h1 { font-size:56px; }
+
+  .highlight { color:var(--accent3); font-weight:600; }
+  .highlight-orange { color:var(--accent); font-weight:600; }
+  .highlight-red { color:var(--accent2); font-weight:600; }
+  .highlight-blue { color:var(--blue); font-weight:600; }
+
+  .h-bar-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .h-bar-label { width:100px; font-size:12px; color:var(--text-dim); text-align:right; flex-shrink:0; font-weight:500; }
+  .h-bar-track { flex:1; height:24px; background:var(--border); border-radius:6px; overflow:hidden; position:relative; }
+  .h-bar-fill { height:100%; border-radius:6px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-size:11px; font-weight:700; transition:width .8s ease; }
+  .h-bar-row:last-child { margin-bottom:0; }
+
+  .cmp-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .cmp-table th { text-align:left; padding:10px 12px; background:var(--surface); color:var(--text-dim); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); }
+  .cmp-table td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .cmp-table tr:last-child td { border-bottom:none; }
+  .cmp-table .metric { color:var(--text-dim); font-weight:500; }
+
+  .step-row { display:flex; align-items:stretch; gap:0; }
+  .step-box { flex:1; padding:10px 8px; text-align:center; position:relative; border-right:1px solid var(--border); }
+  .step-box:last-child { border-right:none; }
+  .step-name { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .step-desc { font-size:10px; color:var(--text-dim); line-height:1.4; }
+  .pain-indicator { display:inline-block; padding:2px 8px; border-radius:10px; font-size:9px; font-weight:700; margin-top:6px; }
+
+  .quote-box { padding:16px 20px; border-left:3px solid var(--accent3); background:rgba(0,212,170,.04); border-radius:0 8px 8px 0; font-size:14px; font-style:italic; line-height:1.6; }
+
+  @media (max-width:1200px) { .slide{padding:36px 44px;} h1{font-size:38px;} h2{font-size:26px;} .big-num{font-size:42px;} }
+</style>
+</head>
+<body>
+
+<!-- ========== SLIDE 1: TITLE ========== -->
+<div class="slide slide-title active" id="s1">
+  <div>
+    <div style="font-size:72px;margin-bottom:16px;">🧭</div>
+    <div class="label">Lab 2 — JTBD Project Analysis</div>
+    <h1>TraVy <span style="font-size:36px;color:var(--text-dim);font-weight:400;">qua lăng kính JTBD</span></h1>
+    <p class="subtitle" style="max-width:750px;margin:0 auto;margin-top:12px;">
+      Trợ lý du lịch AI chuyên biệt cho Việt Nam — phân tích <span class="highlight">job thật</span> của du khách nội địa &amp; quốc tế,<br>
+      tìm đúng <span class="highlight-orange">pain point</span> và chỉ ra AI nên chen vào <span class="highlight-blue">đúng chỗ nào</span>
+    </p>
+    <div style="margin-top:20px;display:flex;justify-content:center;gap:16px;">
+      <span class="tag green">RAG chuyên biệt</span>
+      <span class="tag blue">171 địa điểm</span>
+      <span class="tag cyan">5 tỉnh/thành</span>
+      <span class="tag purple">Hội thoại tự nhiên</span>
+    </div>
+    <div style="margin-top:36px;color:var(--text-dim);font-size:14px;">
+      <p>Nguyễn Văn Dưỡng &nbsp;·&nbsp; A20-00967 &nbsp;·&nbsp; VinUni AI Product Strategy &nbsp;·&nbsp; 18/06/2026</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 2: PROJECT SNAPSHOT + MARKET CONTEXT ========== -->
+<div class="slide" id="s2">
+  <div class="label">Bước 0–2 — Lát cắt & Bối cảnh thị trường</div>
+  <h2>Du khách tự túc mất <span style="color:var(--accent);">4–10 giờ</span> research mỗi chuyến</h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <h3 style="font-size:16px;margin-bottom:12px;">🎯 Lát cắt phân tích</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+          <span class="tag green">1 nhóm người dùng</span>
+          <span class="tag blue">1 hoàn cảnh rõ</span>
+          <span class="tag purple">1 job cốt lõi</span>
+          <span class="tag cyan">1 workflow cụ thể</span>
+        </div>
+        <div style="padding:12px;background:rgba(0,212,170,.06);border-radius:8px;border-left:3px solid var(--accent3);">
+          <p style="font-size:13px;line-height:1.6;">Giúp <strong style="color:var(--accent3);">du khách tự túc (nội địa và quốc tế)</strong> lên lịch trình chuyến đi ngắn ngày <strong>(2–5 ngày)</strong> đến tỉnh/thành chưa quen, từ bước research đến khi có lịch trình theo ngày sẵn sàng đi.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:10px;">📸 Project Snapshot</h3>
+        <div class="point">
+          <div style="font-size:11px;color:var(--accent3);font-weight:600;margin-bottom:4px;">Vấn đề gì?</div>
+          Lập kế hoạch du lịch VN bị <strong>phân mảnh</strong> giữa nhiều nguồn → mất 4–10 giờ research, lịch trình chung chung. Khách quốc tế thêm <strong>rào cản ngôn ngữ</strong>
+        </div>
+        <div class="point">
+          <div style="font-size:11px;color:var(--accent3);font-weight:600;margin-bottom:4px;">User chính?</div>
+          Du khách tự túc <strong>nội địa + quốc tế (20–35 tuổi)</strong>, tự tổ chức chuyến đi, không dùng tour agency
+        </div>
+        <div class="point" style="border-bottom:none;">
+          <div style="font-size:11px;color:var(--accent3);font-weight:600;margin-bottom:4px;">Đang giải quyết bằng?</div>
+          <strong>Nội địa:</strong> Google + blog + Facebook → tự sắp xếp. <strong>Quốc tế:</strong> TripAdvisor + Reddit + Lonely Planet. Cả hai dùng <strong>ChatGPT/Gemini</strong> nhưng bị bịa địa điểm
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="height:100%;display:flex;flex-direction:column;">
+        <h3 style="font-size:16px;margin-bottom:12px;">🌏 Market Context</h3>
+        <div style="flex:1;">
+          <div style="padding:12px;background:rgba(77,159,255,.06);border-radius:8px;margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--blue);font-weight:600;margin-bottom:4px;">Ai gặp vấn đề?</div>
+            <p style="font-size:13px;">Du khách tự túc (nội địa + quốc tế) muốn đi 2–5 ngày đến nơi chưa quen — nhóm 20–35 tuổi. Khách quốc tế thêm rào cản ngôn ngữ</p>
+          </div>
+          <div style="padding:12px;background:rgba(255,107,53,.06);border-radius:8px;margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px;">Pain xuất hiện khi nào?</div>
+            <p style="font-size:13px;">Trước chuyến đi 1–2 tuần, thông tin phân mảnh trên hàng chục nguồn. <strong style="color:var(--accent);">Đặc biệt đau khi đi đến nơi chưa quen</strong></p>
+          </div>
+          <div style="padding:12px;background:rgba(168,85,247,.06);border-radius:8px;margin-bottom:10px;">
+            <div style="font-size:11px;color:var(--purple);font-weight:600;margin-bottom:4px;">Vì sao bây giờ đáng giải?</div>
+            <p style="font-size:13px;">AI đủ mạnh nhưng ChatGPT/Gemini <strong style="color:var(--accent2);">bịa địa điểm</strong> + thiếu data VN chuyên sâu. Du lịch VN bùng nổ cả nội địa lẫn quốc tế nhưng chưa có giải pháp chuyên biệt</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:auto;">
+          <div style="flex:1;text-align:center;padding:12px;background:rgba(0,212,170,.06);border-radius:8px;">
+            <div class="big-num green" style="font-size:32px;">~85M</div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">lượt nội địa/năm</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:12px;background:rgba(77,159,255,.06);border-radius:8px;">
+            <div class="big-num blue" style="font-size:32px;">~18M</div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">lượt quốc tế/năm</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:12px;background:rgba(255,107,53,.06);border-radius:8px;">
+            <div class="big-num orange" style="font-size:32px;">4–10h</div>
+            <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">research mỗi chuyến</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 3: JOB EXECUTOR + CORE JTBD ========== -->
+<div class="slide" id="s3">
+  <div class="label">Bước 3–4 — Job Executor & Core JTBD</div>
+  <h2>Ai đang làm job? Job thật sự là gì?</h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card" style="border-left:3px solid var(--accent3);">
+        <h3 style="font-size:16px;margin-bottom:10px;">👤 Job Executor</h3>
+        <div style="text-align:center;padding:16px 0;">
+          <div style="font-size:48px;margin-bottom:8px;">🧳</div>
+          <div style="font-size:22px;font-weight:800;color:var(--accent3);">Du khách tự túc</div>
+          <div style="font-size:13px;color:var(--accent3);margin-top:4px;">Nội địa + Quốc tế</div>
+          <div style="font-size:13px;color:var(--text-dim);margin-top:4px;">Người trực tiếp ngồi research, chọn địa điểm, và sắp xếp lịch trình</div>
+        </div>
+        <div style="padding:10px;background:var(--surface);border-radius:8px;margin-top:8px;">
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;font-weight:600;">Vì sao đây là job executor?</div>
+          <p style="font-size:12px;line-height:1.6;">Họ <strong>trực tiếp mở Google/blog/Facebook/TripAdvisor</strong> để tìm thông tin và <strong>tự tay ghép lịch trình</strong>. Cùng 1 job — khách quốc tế thêm rào cản ngôn ngữ và thiếu nguồn tiếng Anh.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:14px;margin-bottom:8px;">Phân biệt rõ</h3>
+        <table class="cmp-table" style="font-size:12px;">
+          <tr>
+            <td style="color:var(--accent3);font-weight:600;">Job executor</td>
+            <td>Du khách tự túc (nội địa + quốc tế) — <strong>trực tiếp làm job</strong></td>
+          </tr>
+          <tr>
+            <td class="metric">Buyer</td>
+            <td style="color:var(--text-dim);">Có thể cùng 1 người (tự trả tiền)</td>
+          </tr>
+          <tr>
+            <td class="metric">Influencer</td>
+            <td style="color:var(--text-dim);">Bạn bè/gia đình gợi ý nhưng không làm job</td>
+          </tr>
+          <tr>
+            <td class="metric">Không phải</td>
+            <td style="color:var(--text-dim);">Tour agency, người đi cùng chỉ "follow"</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card" style="border-left:3px solid var(--blue);flex:1;display:flex;flex-direction:column;">
+        <h3 style="font-size:16px;margin-bottom:10px;">🎯 Core JTBD</h3>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Công thức: verb + object + contextual clarifier</div>
+        <div style="padding:10px;background:rgba(255,68,68,.06);border-radius:8px;margin-bottom:10px;">
+          <div style="font-size:10px;color:var(--accent2);font-weight:600;margin-bottom:4px;">BẢN NHÁP — có solution lẫn vào</div>
+          <p style="font-size:13px;text-decoration:line-through;color:var(--text-dim);">Lên lịch trình du lịch cá nhân hóa <span style="color:var(--accent2);">bằng hội thoại AI</span> cho chuyến đi ngắn ngày đến nơi chưa quen ở Việt Nam</p>
+        </div>
+        <div style="text-align:center;color:var(--accent3);font-size:18px;padding:4px;">⬇ Gạch bỏ "bằng hội thoại AI"</div>
+        <div style="padding:16px;background:rgba(0,212,170,.06);border-radius:8px;border:1px solid rgba(0,212,170,.2);flex:1;display:flex;align-items:center;">
+          <p style="font-size:17px;font-weight:700;color:var(--accent3);line-height:1.5;text-align:center;width:100%;">
+            Lên lịch trình du lịch phù hợp sở thích cá nhân và ràng buộc thời gian cho chuyến đi ngắn ngày đến nơi chưa quen
+          </p>
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:11px;color:var(--text-dim);font-weight:600;margin-bottom:6px;">3 tiêu chí tự kiểm</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="tag green">Bỏ tool → job vẫn tồn tại</span>
+            <span class="tag green">Không tên sản phẩm/AI/app</span>
+            <span class="tag green">Mô tả điều user muốn, không phải feature</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 4: 3 JOB STORIES ========== -->
+<div class="slide" id="s4">
+  <div class="label">Bước 5 — Job Stories</div>
+  <h2>3 tình huống thật job xuất hiện</h2>
+  <div style="flex:1;display:flex;flex-direction:column;gap:14px;margin-top:4px;">
+    <div class="card" style="border-left:3px solid var(--accent3);flex:1;display:flex;align-items:center;">
+      <div style="width:100%;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(0,212,170,.15);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--accent3);flex-shrink:0;">1</div>
+          <span class="tag green">Pain chính: research tốn thời gian</span>
+        </div>
+        <div class="grid-3" style="gap:24px;">
+          <div>
+            <div style="font-size:10px;color:var(--accent3);font-weight:700;margin-bottom:4px;">WHEN / Trigger</div>
+            <p style="font-size:13px;line-height:1.5;">Quyết định đi <strong>Hội An 3 ngày</strong> cuối tuần tới nhưng chưa biết gì ngoài phố cổ</p>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--blue);font-weight:700;margin-bottom:4px;">I WANT TO / Motivation</div>
+            <p style="font-size:13px;line-height:1.5;">Có lịch trình theo ngày với <strong>địa điểm + ẩm thực + hoạt động</strong> phù hợp sở thích</p>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--purple);font-weight:700;margin-bottom:4px;">SO I CAN / Outcome</div>
+            <p style="font-size:13px;line-height:1.5;">Không mất cả tuần research mà vẫn có trải nghiệm chất lượng, <strong>không chỉ mấy chỗ quá đông</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--accent);flex:1;display:flex;align-items:center;">
+      <div style="width:100%;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,107,53,.15);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--accent);flex-shrink:0;">2</div>
+          <span class="tag orange">Pain phụ: kế hoạch cứng khó sửa</span>
+        </div>
+        <div class="grid-3" style="gap:24px;">
+          <div>
+            <div style="font-size:10px;color:var(--accent3);font-weight:700;margin-bottom:4px;">WHEN / Trigger</div>
+            <p style="font-size:13px;line-height:1.5;">Lịch trình đã lên nhưng <strong>ngày 2 quá dày</strong> (5 điểm + di chuyển xa) hoặc <strong>trời mưa</strong> bất ngờ</p>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--blue);font-weight:700;margin-bottom:4px;">I WANT TO / Motivation</div>
+            <p style="font-size:13px;line-height:1.5;">Điều chỉnh nhanh <strong>mà không phải lên lại từ đầu</strong> — gộp/bỏ/đổi điểm, giữ logic di chuyển</p>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--purple);font-weight:700;margin-bottom:4px;">SO I CAN / Outcome</div>
+            <p style="font-size:13px;line-height:1.5;">Giữ nhịp độ thoải mái mà không bỏ lỡ điểm quan trọng, <strong>không bị stress giữa chuyến</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple);flex:1;display:flex;align-items:center;">
+      <div style="width:100%;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(168,85,247,.15);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--purple);flex-shrink:0;">3</div>
+          <span class="tag purple">Constraint đặc biệt: thành phần nhóm</span>
+        </div>
+        <div class="grid-3" style="gap:24px;">
+          <div>
+            <div style="font-size:10px;color:var(--accent3);font-weight:700;margin-bottom:4px;">WHEN / Trigger</div>
+            <p style="font-size:13px;line-height:1.5;">Đi cùng <strong>gia đình (bố mẹ 60+, con nhỏ)</strong> đến Đà Lạt lần đầu, muốn ăn địa phương</p>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--blue);font-weight:700;margin-bottom:4px;">I WANT TO / Motivation</div>
+            <p style="font-size:13px;line-height:1.5;">Biết chỗ <strong>phù hợp cả nhóm</strong> + ít tourist trap + nhịp độ vừa phải cho người lớn tuổi</p>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--purple);font-weight:700;margin-bottom:4px;">SO I CAN / Outcome</div>
+            <p style="font-size:13px;line-height:1.5;">Trải nghiệm authentic mà <strong>an toàn cho cả nhà</strong> — không bị phàn nàn "đi đâu cũng đông"</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 5: CURRENT ALTERNATIVES ========== -->
+<div class="slide" id="s5">
+  <div class="label">Bước 6 — Current Alternatives</div>
+  <h2>User đang "thuê" gì để làm job? <span style="font-size:20px;color:var(--text-dim);">Đối thủ qua JTBD lens</span></h2>
+  <div class="grid-3 flex-grow" style="margin-top:4px;">
+    <div class="card" style="border-top:3px solid var(--blue);display:flex;flex-direction:column;">
+      <div style="text-align:center;">
+        <span style="font-size:32px;">🔍</span>
+        <h3 style="font-size:15px;margin-top:8px;color:var(--blue);">Google + Blog du lịch</h3>
+        <div style="font-size:11px;color:var(--text-dim);">VnExpress, Traveloka, Lonely Planet</div>
+      </div>
+      <div style="margin:12px 0;flex:1;">
+        <div style="padding:8px;background:rgba(0,212,170,.06);border-radius:6px;margin-bottom:8px;">
+          <div style="font-size:10px;color:var(--accent3);font-weight:600;">Làm tốt</div>
+          <p style="font-size:12px;margin-top:2px;">Miễn phí, nguồn phong phú, có ảnh/review thật</p>
+        </div>
+        <div style="padding:8px;background:rgba(255,68,68,.06);border-radius:6px;">
+          <div style="font-size:10px;color:var(--accent2);font-weight:600;">Fail ở đâu?</div>
+          <p style="font-size:12px;margin-top:2px;"><strong style="color:var(--accent2);">Phân mảnh</strong> — mỗi blog 1 góc nhìn, tốn 4–10h gom, thông tin cũ. Khách quốc tế: blog VN viết tiếng Việt</p>
+        </div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--surface);border-radius:6px;margin-top:auto;">
+        <div style="font-size:10px;color:var(--text-dim);">Switching cost</div>
+        <div style="font-size:14px;font-weight:700;color:var(--accent3);">Thấp</div>
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple);display:flex;flex-direction:column;">
+      <div style="text-align:center;">
+        <span style="font-size:32px;">💬</span>
+        <h3 style="font-size:15px;margin-top:8px;color:var(--purple);">Facebook / Reddit / TripAdvisor</h3>
+        <div style="font-size:11px;color:var(--text-dim);">"Review du lịch", r/VietnamTravel</div>
+      </div>
+      <div style="margin:12px 0;flex:1;">
+        <div style="padding:8px;background:rgba(0,212,170,.06);border-radius:6px;margin-bottom:8px;">
+          <div style="font-size:10px;color:var(--accent3);font-weight:600;">Làm tốt</div>
+          <p style="font-size:12px;margin-top:2px;">Kinh nghiệm thật, cập nhật, có thể hỏi lại chi tiết</p>
+        </div>
+        <div style="padding:8px;background:rgba(255,68,68,.06);border-radius:6px;">
+          <div style="font-size:10px;color:var(--accent2);font-weight:600;">Fail ở đâu?</div>
+          <p style="font-size:12px;margin-top:2px;"><strong style="color:var(--accent2);">Không có cấu trúc</strong> — mỗi người gợi ý khác, phải tự ghép, chờ reply</p>
+        </div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--surface);border-radius:6px;margin-top:auto;">
+        <div style="font-size:10px;color:var(--text-dim);">Switching cost</div>
+        <div style="font-size:14px;font-weight:700;color:var(--accent3);">Thấp</div>
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--accent);display:flex;flex-direction:column;">
+      <div style="text-align:center;">
+        <span style="font-size:32px;">🤖</span>
+        <h3 style="font-size:15px;margin-top:8px;color:var(--accent);">ChatGPT / Gemini generic</h3>
+        <div style="font-size:11px;color:var(--text-dim);">Free tier, general-purpose AI</div>
+      </div>
+      <div style="margin:12px 0;flex:1;">
+        <div style="padding:8px;background:rgba(0,212,170,.06);border-radius:6px;margin-bottom:8px;">
+          <div style="font-size:10px;color:var(--accent3);font-weight:600;">Làm tốt</div>
+          <p style="font-size:12px;margin-top:2px;"><strong>Nhanh</strong> — output ngay, hiểu ngữ cảnh, cá nhân hóa cơ bản, đa ngôn ngữ</p>
+        </div>
+        <div style="padding:8px;background:rgba(255,68,68,.06);border-radius:6px;">
+          <div style="font-size:10px;color:var(--accent2);font-weight:600;">Fail ở đâu?</div>
+          <p style="font-size:12px;margin-top:2px;"><strong style="color:var(--accent2);">Bịa địa điểm</strong> (hallucination), thiếu data VN chuyên sâu, không citation → phải double-check toàn bộ</p>
+        </div>
+      </div>
+      <div style="text-align:center;padding:8px;background:var(--surface);border-radius:6px;margin-top:auto;">
+        <div style="font-size:10px;color:var(--text-dim);">Switching cost</div>
+        <div style="font-size:14px;font-weight:700;color:var(--accent3);">Thấp</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px;padding:14px;background:rgba(255,107,53,.04);border-color:var(--accent);">
+    <p style="font-size:13px;text-align:center;">
+      <strong>Nếu TraVy biến mất hôm nay?</strong> → User quay về <span class="highlight-orange">ChatGPT/Gemini generic</span> (nhanh nhất, quen rồi). Ít tech-savvy → <span class="highlight-blue">Google + blog + Facebook</span> (nội địa) / <span class="highlight-blue">TripAdvisor + Reddit</span> (quốc tế).
+    </p>
+  </div>
+</div>
+
+<!-- ========== SLIDE 6: JTBD LITE MAP ========== -->
+<div class="slide" id="s6">
+  <div class="label">Bước 7 — JTBD Lite Map</div>
+  <h2>8 bước workflow — pain nằm ở <span style="color:var(--accent2);">Locate</span> và <span style="color:var(--accent2);">Prepare</span></h2>
+  <div class="flex-grow" style="margin-top:4px;">
+    <div class="card" style="margin-bottom:14px;padding:16px;">
+      <div style="display:flex;gap:0;">
+        <div style="flex:1;padding:8px 6px;text-align:center;border-right:1px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;color:var(--accent3);letter-spacing:1px;">DEFINE</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.3;">Xác định đi đâu, bao lâu, đi với ai</div>
+          <div class="pain-indicator" style="background:rgba(0,212,170,.15);color:var(--accent3);">LOW</div>
+        </div>
+        <div style="flex:1.3;padding:8px 6px;text-align:center;border-right:1px solid var(--border);background:rgba(255,68,68,.04);border-radius:4px;">
+          <div style="font-size:10px;font-weight:700;color:var(--accent2);letter-spacing:1px;">LOCATE</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.3;">Tìm địa điểm, quán ăn, hoạt động</div>
+          <div class="pain-indicator" style="background:rgba(255,68,68,.2);color:var(--accent2);">HIGH</div>
+        </div>
+        <div style="flex:1.3;padding:8px 6px;text-align:center;border-right:1px solid var(--border);background:rgba(255,68,68,.04);border-radius:4px;">
+          <div style="font-size:10px;font-weight:700;color:var(--accent2);letter-spacing:1px;">PREPARE</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.3;">Sắp xếp thành lịch trình theo ngày</div>
+          <div class="pain-indicator" style="background:rgba(255,68,68,.2);color:var(--accent2);">HIGH</div>
+        </div>
+        <div style="flex:1;padding:8px 6px;text-align:center;border-right:1px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;color:var(--yellow);letter-spacing:1px;">CONFIRM</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.3;">Kiểm tra giờ, giá, khoảng cách</div>
+          <div class="pain-indicator" style="background:rgba(251,191,36,.15);color:var(--yellow);">MED</div>
+        </div>
+        <div style="flex:1;padding:8px 6px;text-align:center;border-right:1px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;color:var(--accent3);letter-spacing:1px;">EXECUTE</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.3;">Đi theo lịch trình</div>
+          <div class="pain-indicator" style="background:rgba(0,212,170,.15);color:var(--accent3);">LOW</div>
+        </div>
+        <div style="flex:1;padding:8px 6px;text-align:center;border-right:1px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;color:var(--accent3);letter-spacing:1px;">MONITOR</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.3;">Theo dõi có kịp lịch không</div>
+          <div class="pain-indicator" style="background:rgba(0,212,170,.15);color:var(--accent3);">LOW</div>
+        </div>
+        <div style="flex:1;padding:8px 6px;text-align:center;border-right:1px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;color:var(--yellow);letter-spacing:1px;">MODIFY</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.3;">Điều chỉnh khi thay đổi</div>
+          <div class="pain-indicator" style="background:rgba(251,191,36,.15);color:var(--yellow);">MED</div>
+        </div>
+        <div style="flex:1;padding:8px 6px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--accent3);letter-spacing:1px;">CONCLUDE</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px;line-height:1.3;">Đánh giá, lưu kinh nghiệm</div>
+          <div class="pain-indicator" style="background:rgba(0,212,170,.15);color:var(--accent3);">LOW</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="flex:1;">
+      <div class="card" style="border-left:3px solid var(--accent2);">
+        <h3 style="font-size:15px;color:var(--accent2);margin-bottom:10px;">Bước đau #1: LOCATE</h3>
+        <div style="font-size:13px;line-height:1.6;">
+          <p><strong>User đang cố:</strong> Tìm địa điểm, quán ăn, hoạt động phù hợp tại nơi chưa quen</p>
+          <p style="margin-top:8px;"><strong>Đang dùng:</strong> Google + blog + Facebook + hỏi bạn bè</p>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:rgba(255,68,68,.06);border-radius:8px;">
+          <div style="font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Friction</div>
+          <p style="font-size:12px;color:var(--text-dim);line-height:1.5;">
+            <strong style="color:var(--text);">Phân mảnh nghiêm trọng:</strong> mỗi nguồn 1 góc nhìn, mất 4–10h gom, thông tin cũ, thiên vị điểm đông khách. Khách quốc tế: rào cản ngôn ngữ
+          </p>
+        </div>
+      </div>
+      <div class="card" style="border-left:3px solid var(--accent2);">
+        <h3 style="font-size:15px;color:var(--accent2);margin-bottom:10px;">Bước đau #2: PREPARE</h3>
+        <div style="font-size:13px;line-height:1.6;">
+          <p><strong>User đang cố:</strong> Sắp xếp địa điểm thành lịch trình theo ngày hợp lý</p>
+          <p style="margin-top:8px;"><strong>Đang dùng:</strong> Google Sheets / Notes + Google Maps đo khoảng cách</p>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:rgba(255,68,68,.06);border-radius:8px;">
+          <div style="font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:4px;">Friction</div>
+          <p style="font-size:12px;color:var(--text-dim);line-height:1.5;">
+            <strong style="color:var(--text);">Thiếu kiến thức địa lý:</strong> user không biết 2 điểm gần hay xa, giờ mở cửa có khớp không, nhịp độ 1 ngày có quá dày không
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px;padding:12px;text-align:center;">
+      <p style="font-size:13px;">2 bước này chiếm <span style="color:var(--accent2);font-weight:700;">80–90% thời gian</span> toàn bộ quá trình lên kế hoạch — và là nơi <span style="color:var(--accent2);font-weight:700;">current alternatives fail nặng nhất</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 7: AI LEVERAGE POINT ========== -->
+<div class="slide" id="s7">
+  <div class="label">Bước 8 — AI Leverage Point</div>
+  <h2>AI chen vào <span style="color:var(--accent3);">đúng chỗ</span>: gộp Locate + Prepare thành 1 bước</h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card" style="border-left:3px solid var(--accent3);flex:1;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <span class="tag green" style="font-size:11px;">LOCATE</span>
+          <span style="font-size:11px;color:var(--text-dim);">→ AI tổng hợp từ RAG tuyển chọn</span>
+        </div>
+        <table class="cmp-table" style="font-size:12px;">
+          <thead><tr><th>Khía cạnh</th><th>Chi tiết</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="metric">AI giúp bằng cách</td>
+              <td>Tổng hợp từ <strong style="color:var(--accent3);">171 địa điểm, 5 tỉnh/thành</strong> — gợi ý phù hợp sở thích, kèm citation. Hỗ trợ đa ngôn ngữ (VN + EN)</td>
+            </tr>
+            <tr>
+              <td class="metric">Vì sao AI hợp?</td>
+              <td>AI giỏi <strong>tổng hợp thông tin phân mảnh</strong> thành câu trả lời có cấu trúc. RAG chuyên biệt fix điểm yếu ChatGPT</td>
+            </tr>
+            <tr>
+              <td class="metric">Rủi ro</td>
+              <td style="color:var(--accent2);">Hallucination nếu RAG thiếu data. Coverage gap: food_drink chỉ ~5% corpus</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card" style="border-left:3px solid var(--blue);flex:1;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <span class="tag blue" style="font-size:11px;">PREPARE</span>
+          <span style="font-size:11px;color:var(--text-dim);">→ AI sắp xếp + tối ưu lịch trình</span>
+        </div>
+        <table class="cmp-table" style="font-size:12px;">
+          <thead><tr><th>Khía cạnh</th><th>Chi tiết</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="metric">AI giúp bằng cách</td>
+              <td>Tự động sắp xếp thành <strong style="color:var(--blue);">lịch trình theo ngày</strong> tối ưu khoảng cách + nhịp độ, cho phép tinh chỉnh qua chat</td>
+            </tr>
+            <tr>
+              <td class="metric">Vì sao AI hợp?</td>
+              <td>AI giỏi <strong>tối ưu hóa có constraint</strong> (thời gian, khoảng cách, sở thích, thành phần nhóm)</td>
+            </tr>
+            <tr>
+              <td class="metric">Rủi ro</td>
+              <td style="color:var(--accent2);">Sắp sai khoảng cách nếu thiếu PostGIS. Xu hướng nhét quá nhiều điểm/ngày</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card" style="flex:1;display:flex;flex-direction:column;justify-content:center;border:2px solid var(--accent3);background:rgba(0,212,170,.03);">
+        <div style="text-align:center;">
+          <div style="font-size:48px;margin-bottom:12px;">🎯</div>
+          <h3 style="font-size:18px;color:var(--accent3);margin-bottom:12px;">AI Leverage Point chính</h3>
+          <div class="quote-box" style="text-align:left;">
+            <strong style="color:var(--accent3);">Locate → Prepare liên tục:</strong> AI tổng hợp địa điểm phù hợp từ RAG rồi ngay lập tức sắp xếp thành lịch trình theo ngày — gộp 2 bước đau nhất thành <strong>1 bước duy nhất</strong> qua hội thoại.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:14px;margin-bottom:8px;">Vì sao không phải bước khác?</h3>
+        <table class="cmp-table" style="font-size:12px;">
+          <tr>
+            <td class="metric">Define</td>
+            <td><span class="tag green" style="font-size:9px;">LOW</span> User tự quyết, không cần tool</td>
+          </tr>
+          <tr>
+            <td class="metric">Execute</td>
+            <td><span class="tag green" style="font-size:9px;">LOW</span> Đang đi — không phải lúc planning</td>
+          </tr>
+          <tr>
+            <td class="metric">Monitor</td>
+            <td><span class="tag green" style="font-size:9px;">LOW</span> Kiểm soát được, ít friction</td>
+          </tr>
+          <tr>
+            <td class="metric">Modify</td>
+            <td><span class="tag yellow" style="font-size:9px;">MED</span> Giải bằng cùng cơ chế chat</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 8: PRODUCT HYPOTHESIS ========== -->
+<div class="slide" id="s8">
+  <div class="label">Bước 9 — Product Hypothesis</div>
+  <h2>Hypothesis: từ job → giải pháp → tín hiệu sớm</h2>
+  <div class="grid-2 flex-grow" style="margin-top:4px;">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card" style="flex:1;border:2px solid var(--accent3);display:flex;flex-direction:column;">
+        <h3 style="font-size:16px;color:var(--accent3);margin-bottom:14px;">Product Hypothesis</h3>
+        <div style="flex:1;">
+          <div style="padding:14px;background:rgba(0,212,170,.04);border-radius:8px;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--accent3);font-weight:600;margin-bottom:6px;">Nếu chúng ta giúp...</div>
+            <p style="font-size:14px;line-height:1.6;"><strong>du khách tự túc (nội địa + quốc tế)</strong> tìm và sắp xếp địa điểm thành <strong>lịch trình cá nhân hóa</strong> tốt hơn ở bước <strong style="color:var(--accent3);">Locate</strong> và <strong style="color:var(--accent3);">Prepare</strong></p>
+          </div>
+          <div style="padding:14px;background:rgba(77,159,255,.04);border-radius:8px;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--blue);font-weight:600;margin-bottom:6px;">Bằng cách...</div>
+            <p style="font-size:14px;line-height:1.6;">dùng <strong>dữ liệu du lịch VN tuyển chọn (RAG)</strong> kết hợp <strong>hội thoại tự nhiên đa ngôn ngữ</strong> để gộp 2 bước thành 1</p>
+          </div>
+          <div style="padding:14px;background:rgba(255,107,53,.04);border-radius:8px;margin-bottom:12px;">
+            <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;">Thì họ sẽ chuyển từ...</div>
+            <p style="font-size:14px;line-height:1.6;">tự gom <strong>blog / Facebook / TripAdvisor / ChatGPT generic</strong> sang <strong style="color:var(--accent3);">dùng TraVy</strong></p>
+          </div>
+          <div style="padding:14px;background:rgba(168,85,247,.04);border-radius:8px;">
+            <div style="font-size:11px;color:var(--purple);font-weight:600;margin-bottom:6px;">Vì...</div>
+            <p style="font-size:14px;line-height:1.6;"><strong style="color:var(--accent3);">tiết kiệm 4–10 giờ research</strong> mà vẫn có lịch trình chất lượng, cá nhân hóa, đáng tin (có citation, không bịa). Khách quốc tế: xóa rào cản ngôn ngữ</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card">
+        <h3 style="font-size:16px;margin-bottom:14px;">Tín hiệu sớm nếu hypothesis đúng</h3>
+        <div style="padding:16px;background:rgba(0,212,170,.06);border-radius:8px;margin-bottom:12px;border-left:3px solid var(--accent3);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg);flex-shrink:0;">1</div>
+            <div style="font-size:14px;font-weight:600;">Zero-tab completion</div>
+          </div>
+          <p style="font-size:12px;color:var(--text-dim);line-height:1.5;margin-left:38px;">User hoàn thành hội thoại tạo lịch trình mà <strong style="color:var(--text);">không cần mở tab Google/blog nào khác</strong> để verify</p>
+        </div>
+        <div style="padding:16px;background:rgba(77,159,255,.06);border-radius:8px;border-left:3px solid var(--blue);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg);flex-shrink:0;">2</div>
+            <div style="font-size:14px;font-weight:600;">Organic referral</div>
+          </div>
+          <p style="font-size:12px;color:var(--text-dim);line-height:1.5;margin-left:38px;">User quay lại dùng cho chuyến tiếp hoặc <strong style="color:var(--text);">share lịch trình cho bạn bè</strong></p>
+        </div>
+      </div>
+      <div class="card" style="flex:1;">
+        <h3 style="font-size:14px;margin-bottom:10px;">Hypothesis flow</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="tag red" style="min-width:50px;text-align:center;">Pain</span>
+            <div style="flex:1;height:2px;background:var(--border);"></div>
+            <span style="font-size:12px;color:var(--text-dim);">4–10h phân mảnh</span>
+          </div>
+          <div style="text-align:center;color:var(--accent3);font-size:14px;">⬇</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="tag green" style="min-width:50px;text-align:center;">AI</span>
+            <div style="flex:1;height:2px;background:var(--border);"></div>
+            <span style="font-size:12px;color:var(--text-dim);">RAG + chat = 1 bước</span>
+          </div>
+          <div style="text-align:center;color:var(--accent3);font-size:14px;">⬇</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="tag blue" style="min-width:50px;text-align:center;">Switch</span>
+            <div style="flex:1;height:2px;background:var(--border);"></div>
+            <span style="font-size:12px;color:var(--text-dim);">blog/FB/GPT → TraVy</span>
+          </div>
+          <div style="text-align:center;color:var(--accent3);font-size:14px;">⬇</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="tag purple" style="min-width:50px;text-align:center;">Value</span>
+            <div style="flex:1;height:2px;background:var(--border);"></div>
+            <span style="font-size:12px;color:var(--text-dim);">Nhanh + tin + cá nhân hóa</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 9: ASSUMPTIONS TO VALIDATE ========== -->
+<div class="slide" id="s9">
+  <div class="label">Bước 10 — Assumptions to Validate</div>
+  <h2>5 giả thuyết cần kiểm chứng — <span style="color:var(--accent2);">A1 nguy hiểm nhất</span></h2>
+  <div class="flex-grow" style="margin-top:4px;">
+    <div class="card" style="margin-bottom:14px;">
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th style="width:60px;"></th>
+            <th>Assumption</th>
+            <th>Rủi ro</th>
+            <th>Validate bằng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:rgba(255,68,68,.04);">
+            <td><span class="tag red">A1</span></td>
+            <td><strong style="color:var(--accent2);">Pain đủ lớn</strong> (cả nội địa + quốc tế)</td>
+            <td style="font-size:12px;">Có thể họ <em>thích</em> tự research (coi là một phần vui)</td>
+            <td style="font-size:12px;"><strong>Phỏng vấn 5–10 người (cả 2 nhóm):</strong> "Lần cuối tự lên lịch mất bao lâu?"</td>
+          </tr>
+          <tr>
+            <td><span class="tag orange">A2</span></td>
+            <td><strong>RAG tốt hơn</strong> ChatGPT generic</td>
+            <td style="font-size:12px;">ChatGPT cải thiện rất nhanh; 171 địa điểm có thể không đủ coverage</td>
+            <td style="font-size:12px;"><strong>A/B test:</strong> 10 user cùng yêu cầu, so TraVy vs ChatGPT</td>
+          </tr>
+          <tr>
+            <td><span class="tag yellow">A3</span></td>
+            <td>User <strong>tin kết quả AI</strong> đủ để đi theo</td>
+            <td style="font-size:12px;">Trust barrier cao với AI cho thông tin du lịch (sợ đến nơi đóng cửa)</td>
+            <td style="font-size:12px;"><strong>Prototype test:</strong> so mức tin tưởng có citation vs không</td>
+          </tr>
+          <tr>
+            <td><span class="tag blue">A4</span></td>
+            <td><strong>Chat là UX đúng</strong> (vs form/filter/drag-drop)</td>
+            <td style="font-size:12px;">Nhiều travel app thành công dùng form/map — Wanderlog, Google Travel</td>
+            <td style="font-size:12px;"><strong>Usability test:</strong> 5 user dùng prototype, đo completion rate</td>
+          </tr>
+          <tr>
+            <td><span class="tag purple">A5</span></td>
+            <td>User sẵn sàng <strong>bỏ workflow cũ</strong></td>
+            <td style="font-size:12px;">Workflow cũ miễn phí + quen thuộc, inertia cao</td>
+            <td style="font-size:12px;"><strong>Landing page test:</strong> đo conversion CTA → hoàn thành lịch trình</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="border:2px solid var(--accent2);padding:16px;background:rgba(255,68,68,.03);">
+      <div style="display:flex;align-items:flex-start;gap:16px;">
+        <div style="font-size:36px;flex-shrink:0;">⚠️</div>
+        <div>
+          <h3 style="font-size:15px;color:var(--accent2);margin-bottom:8px;">Assumption nguy hiểm nhất: A1 — Pain chưa đủ lớn</h3>
+          <p style="font-size:13px;line-height:1.6;color:var(--text-dim);">
+            Nếu du khách (cả nội địa lẫn quốc tế) <strong style="color:var(--text);">thích tự research</strong> (coi research là một phần vui) hoặc <strong style="color:var(--text);">ChatGPT generic đã đủ tốt</strong> (pain giảm về 0 trước khi TraVy launch), thì <strong style="color:var(--accent2);">toàn bộ hypothesis sụp</strong> — không ai cần tool chuyên biệt để giải pain đã biến mất.
+          </p>
+          <p style="font-size:12px;margin-top:8px;color:var(--accent2);font-weight:600;">→ Cần validate ĐẦU TIÊN trước khi invest thêm vào RAG/feature</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SLIDE 10: TỔNG KẾT ========== -->
+<div class="slide slide-title" id="s10">
+  <div>
+    <div style="font-size:56px;margin-bottom:12px;">🧭</div>
+    <h1 style="font-size:44px;">Tổng kết JTBD Analysis</h1>
+    <div style="max-width:800px;margin:20px auto 0;text-align:left;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
+          <div style="font-size:11px;color:var(--accent3);font-weight:600;margin-bottom:6px;">JOB EXECUTOR</div>
+          <p style="font-size:14px;font-weight:600;">Du khách tự túc (nội địa + quốc tế)</p>
+        </div>
+        <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
+          <div style="font-size:11px;color:var(--blue);font-weight:600;margin-bottom:6px;">CORE JTBD</div>
+          <p style="font-size:13px;font-weight:600;">Lên lịch trình phù hợp sở thích + ràng buộc thời gian cho chuyến đi đến nơi chưa quen</p>
+        </div>
+        <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
+          <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:6px;">2 BƯỚC ĐAU NHẤT</div>
+          <p style="font-size:14px;font-weight:600;">Locate + Prepare <span style="color:var(--text-dim);font-weight:400;">(80–90% thời gian)</span></p>
+        </div>
+        <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
+          <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;">AI LEVERAGE POINT</div>
+          <p style="font-size:14px;font-weight:600;">RAG + chat gộp 2 bước → 1</p>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;text-align:center;">
+        <div style="font-size:11px;color:var(--purple);font-weight:600;margin-bottom:6px;">ASSUMPTION #1 CẦN VALIDATE</div>
+        <p style="font-size:14px;font-weight:600;">Pain có đủ lớn không? Hay user thích tự research?</p>
+      </div>
+    </div>
+    <div style="margin-top:28px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+      <span class="tag green">Job thật, không phải feature list</span>
+      <span class="tag blue">Solution-free JTBD</span>
+      <span class="tag cyan">8-step job map</span>
+      <span class="tag purple">Validate trước khi build</span>
+    </div>
+    <div style="margin-top:32px;color:var(--text-dim);font-size:13px;">
+      <p>Nguyễn Văn Dưỡng &nbsp;·&nbsp; A20-00967 &nbsp;·&nbsp; VinUni AI Product Strategy &nbsp;·&nbsp; 18/06/2026</p>
+      <p style="margin-top:6px;font-size:11px;">Framework: Strategyn JTBD Playbook &nbsp;·&nbsp; Dự án: TraVy — AI Travel Companion for Vietnam</p>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<div class="progress-bar" id="progressBar"></div>
+<div class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">10</span></div>
+<div class="nav">
+  <button onclick="prev()">← Trước</button>
+  <button onclick="next()">Tiếp →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    document.getElementById('currentSlide').textContent = current + 1;
+    document.getElementById('totalSlides').textContent = slides.length;
+    document.getElementById('progressBar').style.width = ((current+1)/slides.length*100)+'%';
+  }
+  function next() { showSlide(current+1); }
+  function prev() { showSlide(current-1); }
+  document.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight'||e.key===' ') { e.preventDefault(); next(); }
+    if (e.key==='ArrowLeft') { e.preventDefault(); prev(); }
+  });
+  showSlide(0);
+</script>
+</body>
+</html>
